@@ -41,3 +41,17 @@ Develop a simulation system to coordinate and control a swarm of drones for vari
 	- Conduct the final demo of the Drone Swarm Coordination system.
 	- Present the project, highlighting key features, challenges faced, and lessons learned.
 	- Submit any required documentation or project reports.
+
+## Reading List
+
+Non-exhaustive list of readings that may help with the project.
+
+- [A multiple-drone arc routing and mothership coordination problem](./documentation/readings/reading1.pdf)
+- [Building and Simulating Multi-Dimensional Drone Topologies](./documentation/readings/reading2.pdf)
+- [Communication and Coordination for Drone Networks](./documentation/readings/reading3.pdf)
+- [Drone networks: Communications, coordination, and sensing](./documentation/readings/reading4.pdf)
+- [Information Exchange and Decision Making in Micro Aerial Vehicle Networks for Cooperative Search](./documentation/readings/reading5.pdf)
+- [Multiple UAV Coordination](./documentation/readings/reading6.pdf)
+- [Multi-Robot Persistent Surveillance With Connectivity Constraints](./documentation/readings/reading7.pdf)
+- [Networked UAVs as aerial sensor network for disaster management applications](./documentation/readings/reading8.pdf)
+- [Obstacle-Aware and Energy-Efficient Multi-Drone Coordination and Networking for Disaster Response](./documentation/readings/reading9.pdf)
