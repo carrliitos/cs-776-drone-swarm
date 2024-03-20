@@ -1,9 +1,3 @@
-// File:          DroneController.java
-// Date:
-// Description:
-// Author:
-// Modifications:
-
 import com.cyberbotics.webots.controller.Motor;
 import com.cyberbotics.webots.controller.Robot;
 import com.cyberbotics.webots.controller.LED;
