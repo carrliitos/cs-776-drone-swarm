@@ -2,24 +2,19 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "../protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/factory/containers/protos/WoodenBox.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/dji/mavic/protos/Mavic2Pro.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 
 WorldInfo {
 }
 Viewpoint {
   orientation -0.31002378717718637 0.0384406942276475 0.949951348444546 2.909831203655052
-  position 1.1731701208724652 -0.3170954815046519 0.7164919039557803
+  position 5.06731213971531 -1.2845637931033427 3.6483678147989367
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
-}
-RectangleArena {
-  floorSize 10 10
-  floorTileSize 1 1
-  wallHeight 0.05
 }
 Mavic2Pro {
   controller "DroneController"
@@ -31,4 +26,9 @@ WoodenBox {
   translation -2.63058 -2.12945 0.3
   name "wooden box(1)"
   size 0.8 1 1
+}
+RectangleArena {
+  floorSize 10 10
+  floorTileSize 1 1
+  wallHeight 0.05
 }

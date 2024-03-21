@@ -24,9 +24,10 @@ import com.cyberbotics.webots.controller.Gyro;
  **/
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
-  private static final double MAX_VELOCITY = 2.0;
+  private static final double MAX_VELOCITY = 100;
+  private static final double TARGET_ALTITUDE = 1.0;
 
-  private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller;
+  private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller, cameraRollMotor, cameraPitchMotor;
   private Motor motors[];
   private LED frontLeftLED, frontRightLED;
   private InertialUnit imu;
@@ -67,8 +68,11 @@ public class DroneController extends Robot {
     
     for (Motor motor : motors) {
       motor.setPosition(Double.POSITIVE_INFINITY);
-      motor.setVelocity(0.10 * MAX_VELOCITY);
+      motor.setVelocity(0.10 * MAX_VELOCITY); // 10% of velocity to start
     }
+    
+    cameraRollMotor = getMotor("camera roll");
+    cameraPitchMotor = getMotor("camera pitch");
   }
   
   private void displayWelcomeMessage() {
@@ -103,28 +107,64 @@ public class DroneController extends Robot {
     }
   }
   
-  private void stabilizations(double roll, double rollVelocity, double rollDisturbance) {
-    ;
+  private void stabilizeCamera(double rollVelocity, double pitchVelocity) {
+    cameraRollMotor.setPosition(-0.115 * rollVelocity);
+    cameraPitchMotor.setPosition(-0.1 * pitchVelocity);
   }
   
-  private void actuators() {
-    ;
+  private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
+                            double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance) {
+    final double rollInput = K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0) + rollVelocity + rollDisturbance;
+    final double pitchInput = K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0) + pitchVelocity + pitchDisturbance;
+    final double yawInput = yawDisturbance;
+    final double clampedDifferenceAltitude = Math.min(Math.max(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0), 1.0);
+    final double verticalInput = K_VERTICAL_P * Math.pow(clampedDifferenceAltitude, 3.0);
+    
+    return new double[] { rollInput, pitchInput, yawInput, verticalInput };
+  }
+  
+  private void activateActuators(double verticalInput, double rollInput, double pitchInput, double yawInput) {
+    final double frontLeftPropellerInput = K_VERTICAL_THRUST + verticalInput - rollInput + pitchInput - yawInput;
+    final double frontRightPropellerInput = K_VERTICAL_THRUST + verticalInput + rollInput + pitchInput + yawInput;
+    final double rearLeftPropellerInput = K_VERTICAL_THRUST + verticalInput - rollInput - pitchInput + yawInput;
+    final double rearRightPropellerInput = K_VERTICAL_THRUST + verticalInput + rollInput - pitchInput - yawInput;
+
+    frontLeftPropeller.setVelocity(frontLeftPropellerInput);
+    frontRightPropeller.setVelocity(-frontRightPropellerInput);
+    rearLeftPropeller.setVelocity(-rearLeftPropellerInput);
+    rearRightPropeller.setVelocity(rearRightPropellerInput);
   }
   
   // Main control loop
   public void run() {
     displayWelcomeMessage();
     while (step(TIME_STEP) != -1) {
+      double rollDisturbance = 0.0;
+      double pitchDisturbance = 0.0;
+      double yawDisturbance = 0.0;
+    
+      double[] robotState = getRobotState();
+      double roll = robotState[0];
+      double pitch = robotState[1];
+      double altitude = robotState[2];
+      double rollVelocity = robotState[3];
+      double pitchVelocity = robotState[4];
+    
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
       
       // Stabilize the Camera by actuating the camera motors according to the gyro feedback.
-      
-      // Transform the keyboard input to disturbances on the stabilization algorithm.
+      stabilizeCamera(rollVelocity, pitchVelocity);
 
       // Compute the roll, pitch, yaw and vertical inputs.
+      double[] rpyvInputs = computeInputs(roll, altitude, rollVelocity, rollDisturbance, pitch, pitchVelocity, pitchDisturbance, yawDisturbance);
+      double rollInput = rpyvInputs[0];
+      double pitchInput = rpyvInputs[1];
+      double yawInput = rpyvInputs[2];
+      double verticalInput = rpyvInputs[3];
       
       // Actuate the motors taking into consideration all the computed inputs.
+      activateActuators(verticalInput, rollInput, pitchInput, yawInput);
     }
   }
   
