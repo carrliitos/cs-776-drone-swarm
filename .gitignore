@@ -1,3 +1,9 @@
+!documentation/recordings/.gitkeep
+documentation/recordings/*.mp4
+
+src/worlds/*.wbproj
+src/worlds/*.jpg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
