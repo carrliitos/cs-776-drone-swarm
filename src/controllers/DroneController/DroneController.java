@@ -150,6 +150,10 @@ public class DroneController extends Robot {
             double rollVelocity = robotState[3];
             double pitchVelocity = robotState[4];
 
+            double[] pitch_Kpid = {2.0, 0.1, 2.0};
+            PitchController pitchController = new PitchController(pitch_Kpid);
+            double pitchPID = pitchController.calculatePitchPID(pitch, 0.0);
+
             // Blink the front LEDs alternatively with a 1 second rate.
             blinkLEDS();
 
