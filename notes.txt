@@ -1,0 +1,36 @@
+main control loop
+
+main() {
+  while (step(TIME_STEP) != -1) {
+    1. Retrieve robot position using the sensors
+      - Inertial Mass Unit
+      - GPS Coordinates
+      - Gyro
+    2. Blink the front LEDs alternatively with 1 second rate -- indicates the sensors are working
+    3. Stabilize camera by actuating the camera motors according to the gyro feed -- currently does not work
+    4. Obtain PID values:
+      - PID control for x position - XController
+      - PID control for altitude position - AltitudeController
+      - PID control for z position - ZController
+      - PID control for yaw - RotationController
+    5. Calculate motor inputs based on PID Controls
+    6. Set motor velocities based on calculated motor inputs
+  }
+}
+
+## Notes
+
+In the context of drones or aircraft, roll, pitch, and yaw are used to describe the orientation or rotation of the 
+vehicle in three-dimensional space. They are typically defined as follows:
+
+- Roll: Rotation around the longitudinal axis (usually the x-axis), which runs from the front to the back of the 
+vehicle. Imagine an airplane tilting its wings from side to side.
+- Pitch: Rotation around the lateral axis (usually the y-axis), which runs from one side of the vehicle to the other. 
+This motion is similar to nodding your head up and down.
+- Yaw: Rotation around the vertical axis (usually the z-axis), which runs from the top to the bottom of the vehicle. 
+Yawing is like turning your head from side to side to look left or right.
+
+So, in terms of a coordinate system, 
+  - roll could be associated with changes in the x-axis, 
+  - pitch would typically be associated with changes in the y-axis, and 
+  - yaw, would be associated with changes in the z-axis.
