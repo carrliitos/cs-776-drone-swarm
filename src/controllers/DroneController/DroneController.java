@@ -98,23 +98,23 @@ public class DroneController extends Robot {
       final double gps_position_y = gps.getValues()[1]; // Altitude
       final double gps_position_z = gps.getValues()[2];
       
-      final double rollVelocity = gyro.getValues()[0];
-      final double pitchVelocity = gyro.getValues()[1];
+      final double rollAcceleration = gyro.getValues()[0];
+      final double pitchAcceleration = gyro.getValues()[1];
 
-      return new double[]{roll, pitch, yaw, gps_position_x, gps_position_y, gps_position_z, rollVelocity, pitchVelocity};
+      return new double[]{roll, pitch, yaw, gps_position_x, gps_position_y, gps_position_z, rollAcceleration, pitchAcceleration};
     } catch (Exception e) {
       System.err.println("Error retrieving robot state: " + e.getMessage());
       return new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // Default values
     }
   }
   
-  private void stabilizeCamera(double rollVelocity, double pitchVelocity) {
-    cameraRollMotor.setPosition(-0.115 * rollVelocity);
-    cameraPitchMotor.setPosition(-0.1 * pitchVelocity);
+  private void stabilizeCamera(double rollAcceleration, double pitchAcceleration) {
+    cameraRollMotor.setPosition(-0.115 * rollAcceleration);
+    cameraPitchMotor.setPosition(-0.1 * pitchAcceleration);
   }
   
-  private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance,
-                                  double pitch, double pitchVelocity, double pitchDisturbance, double yaw, 
+  private double[] computeInputs(double roll, double altitude, double rollAcceleration, double rollDisturbance,
+                                  double pitch, double pitchAcceleration, double pitchDisturbance, double yaw, 
                                   double yawDisturbance, double kp_x, double kd_x, double kp_z, double kd_z,
                                   double kp_yaw, double kd_yaw, double kp_altitude, double kd_altitude,
                                   double gps_position_x, double gps_position_z) {
@@ -125,7 +125,7 @@ public class DroneController extends Robot {
     last_error_x = errorX;
     clamp.setValue(pitch, -1.0, 1.0);
     double clampedPitch = clamp.getValue();
-    double initialPitchInput = (K_PITCH_P * clampedPitch) + 5.0 * pitchVelocity + pitchDisturbance;
+    double initialPitchInput = (K_PITCH_P * clampedPitch) + 5.0 * pitchAcceleration + pitchDisturbance;
     final double pitchInput = initialPitchInput + (kp_x  * errorX) + (kd_x * d_ErrorX);
 
     // PID Control for z position
@@ -135,7 +135,7 @@ public class DroneController extends Robot {
     last_error_z = errorZ;
     clamp.setValue(roll, -1.0, 1.0);
     double clampedRoll = clamp.getValue();
-    double initialRollInput = (K_ROLL_P * clampedRoll) - 5.0 * rollVelocity + rollDisturbance;
+    double initialRollInput = (K_ROLL_P * clampedRoll) - 5.0 * rollAcceleration + rollDisturbance;
     final double rollInput = initialRollInput + (kp_z * errorZ) + (kd_z * d_ErrorZ);
 
     // PID Control for altitude position
@@ -198,18 +198,18 @@ public class DroneController extends Robot {
       double gps_position_x = robotState[3];
       double gps_position_y = robotState[4]; // Altitude
       double gps_position_z = robotState[5];
-      double rollVelocity = robotState[6];
-      double pitchVelocity = robotState[7];
+      double rollAcceleration = robotState[6];
+      double pitchAcceleration = robotState[7];
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
 
       // Stabilize the Camera by actuating the camera motors according to the gyro feedback.
-      stabilizeCamera(rollVelocity, pitchVelocity);
+      stabilizeCamera(rollAcceleration, pitchAcceleration);
 
       // Compute the roll, pitch, yaw and vertical inputs.
-      double[] rpyvInputs = computeInputs(roll, gps_position_y, rollVelocity, rollDisturbance, pitch, 
-                                          pitchVelocity, pitchDisturbance, yaw, yawDisturbance, 
+      double[] rpyvInputs = computeInputs(roll, gps_position_y, rollAcceleration, rollDisturbance, pitch, 
+                                          pitchAcceleration, pitchDisturbance, yaw, yawDisturbance, 
                                           kp_x, kd_x, kp_z, kd_z, kp_yaw, kd_yaw, kp_altitude, kd_altitude,
                                           gps_position_x, gps_position_z);
       double rollInput = rpyvInputs[0];
