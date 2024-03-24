@@ -125,7 +125,7 @@ public class DroneController extends Robot {
     last_error_x = errorX;
     clamp.setValue(pitch, -1.0, 1.0);
     double clampedPitch = clamp.getValue();
-    double initialPitchInput = (K_PITCH_P * clampedPitch) - 5.0 * pitchVelocity + pitchDisturbance;
+    double initialPitchInput = (K_PITCH_P * clampedPitch) + 5.0 * pitchVelocity + pitchDisturbance;
     final double pitchInput = initialPitchInput + (kp_x  * errorX) + (kd_x * d_ErrorX);
 
     // PID Control for z position
