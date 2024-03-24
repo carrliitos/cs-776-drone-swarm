@@ -4,6 +4,7 @@ import com.cyberbotics.webots.controller.LED;
 import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
+import com.cyberbotics.webots.controller.Compass;
 
 /**
  * PID Reading: https://oscarliang.com/pid/
@@ -11,7 +12,7 @@ import com.cyberbotics.webots.controller.Gyro;
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   // private static final double MAX_VELOCITY = 100;
-  private static final double TARGET_ALTITUDE = 1.0; // 1 meter
+  private static final double TARGET_ALTITUDE = 0.5; // 1 meter
   private static final double TARGET_X_POSITION = 0.0;
   private static final double TARGET_Z_POSITION = 0.0;
   private static final double TARGET_YAW = -1;
@@ -23,6 +24,7 @@ public class DroneController extends Robot {
   private GPS gps;
   private Gyro gyro;
   private Clamp clamp;
+  private Compass compass;
 
   private double last_error_x = 0.0;
   private double last_error_z = 0.0;
@@ -71,6 +73,8 @@ public class DroneController extends Robot {
     cameraPitchMotor.setPosition(0.7);
     
     clamp = new Clamp();
+    compass = getCompass("compass");
+    compass.enable(TIME_STEP);
   }
   
   private void displayWelcomeMessage() {
@@ -125,7 +129,7 @@ public class DroneController extends Robot {
     last_error_x = errorX;
     clamp.setValue(pitch, -1.0, 1.0);
     double clampedPitch = clamp.getValue();
-    double initialPitchInput = (K_PITCH_P * clampedPitch) + 5.0 * pitchAcceleration + pitchDisturbance;
+    double initialPitchInput = (K_PITCH_P * clampedPitch) - 5.0 * pitchAcceleration + pitchDisturbance;
     final double pitchInput = initialPitchInput + (kp_x  * errorX) + (kd_x * d_ErrorX);
 
     // PID Control for z position
@@ -135,7 +139,7 @@ public class DroneController extends Robot {
     last_error_z = errorZ;
     clamp.setValue(roll, -1.0, 1.0);
     double clampedRoll = clamp.getValue();
-    double initialRollInput = (K_ROLL_P * clampedRoll) - 5.0 * rollAcceleration + rollDisturbance;
+    double initialRollInput = (K_ROLL_P * clampedRoll) + 5.0 * rollAcceleration + rollDisturbance;
     final double rollInput = initialRollInput + (kp_z * errorZ) + (kd_z * d_ErrorZ);
 
     // PID Control for altitude position
@@ -144,7 +148,7 @@ public class DroneController extends Robot {
     double errorAltitude = clampedDifferenceAltitude;
     double d_ErrorAltitude = errorAltitude - last_error_altitude;
     last_error_altitude = errorAltitude;
-    final double verticalInput = (kp_altitude * errorAltitude) + (kd_altitude * d_ErrorAltitude);
+    final double verticalInput = K_VERTICAL_P * Math.pow(clampedDifferenceAltitude, 3.0);
 
     // PID Control for rotation
     double errorYaw = TARGET_YAW - yaw;
@@ -156,6 +160,7 @@ public class DroneController extends Robot {
 
     return new double[] { rollInput, pitchInput, yawInput, verticalInput };
   }
+
   
   private void activateActuators(double verticalInput, double rollInput, double pitchInput, double yawInput) {
     final double frontLeftPropellerInput = K_VERTICAL_THRUST + verticalInput - yawInput + pitchInput - rollInput;
@@ -167,12 +172,6 @@ public class DroneController extends Robot {
     frontRightPropeller.setVelocity(-frontRightPropellerInput);
     rearLeftPropeller.setVelocity(-rearLeftPropellerInput);
     rearRightPropeller.setVelocity(rearRightPropellerInput);
-    
-    System.out.println("frontLeftPropeller velocity: " + frontLeftPropeller.getVelocity());
-    System.out.println("frontRightPropeller velocity: " + frontRightPropeller.getVelocity());
-    System.out.println("rearLeftPropeller velocity: " + rearLeftPropeller.getVelocity());
-    System.out.println("rearRightPropeller velocity: " + rearRightPropeller.getVelocity());
-    System.out.println("==========");
   }
   
   // Main control loop
@@ -180,14 +179,14 @@ public class DroneController extends Robot {
     double rollDisturbance = 0.0;
     double pitchDisturbance = 0.0;
     double yawDisturbance = 0.0;
-    double kp_x = 10;
-    double kd_x = 10;
-    double kp_z = 10;
-    double kd_z = 10;
-    double kp_altitude = 3;
-    double kd_altitude = 10;
-    double kp_yaw = 1;
-    double kd_yaw = 1;
+    double kp_x = 10.0;
+    double kd_x = 10.0;
+    double kp_z = 10.0;
+    double kd_z = 10.0;
+    double kp_altitude = 3.0;
+    double kd_altitude = 10.0;
+    double kp_yaw = 1.0;
+    double kd_yaw = 1.0;
     
     displayWelcomeMessage();
     while (step(TIME_STEP) != -1) {
