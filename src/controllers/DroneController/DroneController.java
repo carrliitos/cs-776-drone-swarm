@@ -10,8 +10,8 @@ import com.cyberbotics.webots.controller.Gyro;
  **/
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
-  private static final double MAX_VELOCITY = 10;
-  private static final double TARGET_ALTITUDE = 1.0;
+  // private static final double MAX_VELOCITY = 100;
+  private static final double TARGET_ALTITUDE = 1.0; // 1 meter
   private static final double TARGET_X_POSITION = 0.0;
   private static final double TARGET_Z_POSITION = 0.0;
   private static final double TARGET_YAW = -1;
@@ -63,11 +63,13 @@ public class DroneController extends Robot {
   
     for (Motor motor : motors) {
       motor.setPosition(Double.POSITIVE_INFINITY);
-      motor.setVelocity(0.50 * MAX_VELOCITY); // 50% of max velocity to start
-    }
+      motor.setVelocity(1);
+     }
   
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
+    cameraPitchMotor.setPosition(0.7);
+    
     clamp = new Clamp();
   }
   
@@ -88,7 +90,7 @@ public class DroneController extends Robot {
   
   private double[] getRobotState() {
     try {
-      final double roll = imu.getRollPitchYaw()[0] + Math.PI / 2.0;
+      final double roll = imu.getRollPitchYaw()[0];
       final double pitch = imu.getRollPitchYaw()[1];
       final double yaw = imu.getRollPitchYaw()[2];
       
@@ -145,7 +147,7 @@ public class DroneController extends Robot {
     final double verticalInput = (kp_altitude * errorAltitude) + (kd_altitude * d_ErrorAltitude);
 
     // PID Control for rotation
-    double errorYaw = TARGET_ALTITUDE - yaw;
+    double errorYaw = TARGET_YAW - yaw;
     double d_ErrorYaw = errorYaw - last_error_yaw;
     last_error_yaw = errorYaw;
     clamp.setValue(errorYaw, -1.0, 1.0);
@@ -158,13 +160,19 @@ public class DroneController extends Robot {
   private void activateActuators(double verticalInput, double rollInput, double pitchInput, double yawInput) {
     final double frontLeftPropellerInput = K_VERTICAL_THRUST + verticalInput - yawInput + pitchInput - rollInput;
     final double frontRightPropellerInput = K_VERTICAL_THRUST + verticalInput + yawInput + pitchInput + rollInput;
-    final double rearLeftPropellerInput = K_VERTICAL_THRUST + verticalInput + yawInput - pitchInput - rollInput;
+    final double rearLeftPropellerInput = K_VERTICAL_THRUST + verticalInput - yawInput - pitchInput - rollInput;
     final double rearRightPropellerInput = K_VERTICAL_THRUST + verticalInput - yawInput - pitchInput + rollInput;
-
+  
     frontLeftPropeller.setVelocity(frontLeftPropellerInput);
     frontRightPropeller.setVelocity(-frontRightPropellerInput);
     rearLeftPropeller.setVelocity(-rearLeftPropellerInput);
     rearRightPropeller.setVelocity(rearRightPropellerInput);
+    
+    System.out.println("frontLeftPropeller velocity: " + frontLeftPropeller.getVelocity());
+    System.out.println("frontRightPropeller velocity: " + frontRightPropeller.getVelocity());
+    System.out.println("rearLeftPropeller velocity: " + rearLeftPropeller.getVelocity());
+    System.out.println("rearRightPropeller velocity: " + rearRightPropeller.getVelocity());
+    System.out.println("==========");
   }
   
   // Main control loop
