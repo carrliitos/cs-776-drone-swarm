@@ -19,10 +19,10 @@ public class DroneController extends Robot {
   
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
-  private static final double K_VERTICAL_OFFSET = 0.6; // Vertical offset where the robot actually targets to stabilize itself.
+  private static final double K_VERTICAL_OFFSET = 0.2; // Vertical offset where the robot actually targets to stabilize itself.
   private static final double K_VERTICAL_P = 2.0; // P constant of the vertical PID.
-  private static final double K_ROLL_P = 10.0; // P constant of the roll PID.
-  private static final double K_PITCH_P = 10.0; // P constant of the pitch PID.
+  private static final double K_ROLL_P = 25.0; // P constant of the roll PID.
+  private static final double K_PITCH_P = 20.0; // P constant of the pitch PID.
   
   public DroneController() {
     super();
@@ -51,7 +51,7 @@ public class DroneController extends Robot {
     
     for (Motor motor : motors) {
       motor.setPosition(Double.POSITIVE_INFINITY);
-      motor.setVelocity(0.10 * MAX_VELOCITY); // 10% of velocity to start
+      motor.setVelocity(1); // 10% of velocity to start
     }
     
     cameraRollMotor = getMotor("camera roll");
@@ -97,6 +97,12 @@ public class DroneController extends Robot {
   
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance) {
+    System.out.printf("Roll disturbance: %.8f %n", rollDisturbance);
+    System.out.printf("Roll velocity: %.8f %n", rollVelocity);
+    System.out.printf("Pitch disturbance: %.8f %n", pitchDisturbance);
+    System.out.printf("Pitch velocity: %.8f %n", pitchVelocity);
+    System.out.printf("Yaw disturbance: %.8f %n", yawDisturbance);
+    
     final double rollInput = K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0) + rollVelocity + rollDisturbance;
     final double pitchInput = K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0) + pitchVelocity + pitchDisturbance;
     final double yawInput = yawDisturbance;
@@ -138,7 +144,6 @@ public class DroneController extends Robot {
       System.out.printf("Altitude Current State: %.8f %n", altitude);
       System.out.printf("Roll Velocity Current State: %.8f %n", rollVelocity);
       System.out.printf("Pitch Velocity Current State: %.8f %n", pitchVelocity);
-      System.out.println("==============================");
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -153,9 +158,15 @@ public class DroneController extends Robot {
       double pitchInput = rpyvInputs[1];
       double yawInput = rpyvInputs[2];
       double verticalInput = rpyvInputs[3];
+      
+      System.out.printf("Roll Input: %.8f %n", rollInput);
+      System.out.printf("Pitch Input: %.8f %n", pitchInput);
+      System.out.printf("Yaw Input: %.8f %n", yawInput);
+      System.out.printf("Vertical Input: %.8f %n", verticalInput);
 
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
+      System.out.println("==============================");
     }
   }
   
