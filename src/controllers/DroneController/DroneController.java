@@ -19,7 +19,9 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
-  
+  private CsvWriter positionCsvWriter;
+  private CsvWriter inputsCsvWriter;
+    
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.2; // Vertical offset where the robot actually targets to stabilize itself.
@@ -67,6 +69,8 @@ public class DroneController extends Robot {
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
+    positionCsvWriter = new CsvWriter("../data/positions_data.csv");
+    inputsCsvWriter = new CsvWriter("../data/inputs_data.csv");
   }
   
   private void displayWelcomeMessage() {
@@ -99,7 +103,10 @@ public class DroneController extends Robot {
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
 
-      return new double[]{roll, pitch, yaw, altitude, rollVelocity, pitchVelocity, positionX, positionZ};
+      double[] positions = { roll, pitch, yaw, altitude, rollVelocity, pitchVelocity, positionX, positionZ };
+      positionCsvWriter.writeData(positions);
+
+      return positions;
     } catch (Exception e) {
       System.err.println("Error retrieving robot state: " + e.getMessage());
       return new double[]{0.0, 0.0, 0.0, 0.0, 0.0}; // Default values
@@ -171,6 +178,10 @@ public class DroneController extends Robot {
   // Main control loop
   public void run() {
     displayWelcomeMessage();
+    String[] positionHeaders = { "currRoll", "currPitch", "currYaw", "currAltitude", "currRollVelocity", 
+                                 "currPitchVelocity", "currPositionX", "currPositionz" };
+    positionCsvWriter.writeHeaders(positionHeaders);
+    
     while (step(TIME_STEP) != -1) {
       double rollDisturbance = 0.0;
       double pitchDisturbance = 0.0;
@@ -217,8 +228,14 @@ public class DroneController extends Robot {
 
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
+      String[] headers = { "currRoll", "currPitch", "currYaw", "currRollVelocity", "currPitchVelocity",
+                           "currAltitude", "currPositionX", "currPositionZ", "rollInput", "pitchInput",
+                           "yawInput", "verticalInput" };
+      double[] data = { roll, pitch, yaw, rollVelocity, pitchVelocity, altitude, 
+                          positionX, positionZ, rollInput, pitchInput, yawInput, verticalInput };
       System.out.println("==============================");
     }
+    positionCsvWriter.close();
   }
   
   public static void main(String[] args) {
