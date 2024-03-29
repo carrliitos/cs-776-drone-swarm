@@ -144,7 +144,7 @@ public class DroneController extends Robot {
     double dErrorAltitude = errorAltitude - lastErrorAltitude;
     lastErrorAltitude = errorAltitude;
     errorSumAltitude += errorAltitude;
-    return (KP_ALTITUDE * errorAltitude) + (KD_ALTITUDE * dErrorAltitude) + (KI_ALTITUDE * errorSumAltitude);
+    return (K_VERTICAL_P * errorAltitude) + (KP_ALTITUDE * errorAltitude) + (KD_ALTITUDE * dErrorAltitude) + (KI_ALTITUDE * errorSumAltitude);
   }
 
   private double computeYawInput(double yaw, double yawDisturbance, double errorYaw, double lastErrorYaw, double errorSumYaw) {
