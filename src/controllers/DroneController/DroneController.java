@@ -24,8 +24,8 @@ public class DroneController extends Robot {
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.2; // Vertical offset where the robot actually targets to stabilize itself.
   private static final double K_VERTICAL_P = 2.0; // P constant of the vertical PID.
-  private static final double K_ROLL_P = 25.0; // P constant of the roll PID.
-  private static final double K_PITCH_P = 20.0; // P constant of the pitch PID.
+  private static final double K_ROLL_P = 50.0; // P constant of the roll PID.
+  private static final double K_PITCH_P = 30.0; // P constant of the pitch PID.
   private static final double KP_X = 10.0;
   private static final double KD_X = 10.0;
   private static final double KP_Z = 10.0;
@@ -91,11 +91,15 @@ public class DroneController extends Robot {
       final double roll = imu.getRollPitchYaw()[0];
       final double pitch = imu.getRollPitchYaw()[1];
       final double yaw = imu.getRollPitchYaw()[2];
-      final double altitude = gps.getValues()[2];
+
+      final double positionX = gps.getValues()[0];
+      final double altitude = gps.getValues()[1];
+      final double positionZ = gps.getValues()[2];
+
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
 
-      return new double[]{roll, pitch, yaw, altitude, rollVelocity, pitchVelocity};
+      return new double[]{roll, pitch, yaw, altitude, rollVelocity, pitchVelocity, positionX, positionZ};
     } catch (Exception e) {
       System.err.println("Error retrieving robot state: " + e.getMessage());
       return new double[]{0.0, 0.0, 0.0, 0.0, 0.0}; // Default values
@@ -133,9 +137,7 @@ public class DroneController extends Robot {
 
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                    double pitch, double pitchVelocity, double pitchDisturbance, 
-                                   double yaw, double yawDisturbance) {
-    double positionX = 0.0;
-    double positionZ = 0.0;
+                                   double yaw, double yawDisturbance, double positionX, double positionZ) {
     double lastErrorX = 0.0;
     double lastErrorZ = 0.0;
     double lastErrorAltitude = 0.0;
@@ -181,13 +183,17 @@ public class DroneController extends Robot {
       double altitude = robotState[3];
       double rollVelocity = robotState[4];
       double pitchVelocity = robotState[5];
+      double positionX = robotState[6];
+      double positionZ = robotState[7];
       
       System.out.printf("Roll Current State: %.8f %n", roll);
       System.out.printf("Pitch Current State: %.8f %n", pitch);
       System.out.printf("Yaw Current State: %.8f %n", yaw);
-      System.out.printf("Altitude Current State: %.8f %n", altitude);
       System.out.printf("Roll Velocity Current State: %.8f %n", rollVelocity);
       System.out.printf("Pitch Velocity Current State: %.8f %n", pitchVelocity);
+      System.out.printf("Current Altitude: %.8f %n", altitude);
+      System.out.printf("Current Position X: %.8f %n", positionX);
+      System.out.printf("Current Position Z: %.8f %n", positionZ);
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -198,7 +204,7 @@ public class DroneController extends Robot {
       // Compute the roll, pitch, yaw and vertical inputs.
       double[] rpyvInputs = computeInputs(roll, altitude, rollVelocity, rollDisturbance, 
                                           pitch, pitchVelocity, pitchDisturbance, 
-                                          yaw, yawDisturbance);
+                                          yaw, yawDisturbance, positionX, positionZ);
       double rollInput = rpyvInputs[0];
       double pitchInput = rpyvInputs[1];
       double yawInput = rpyvInputs[2];
