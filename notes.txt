@@ -1,0 +1,53 @@
+main control loop
+
+main() {
+  while (step(TIME_STEP) != -1) {
+    1. Retrieve robot position using the sensors
+      - Inertial Mass Unit
+      - GPS Coordinates
+      - Gyro
+    2. Blink the front LEDs alternatively with 1 second rate -- indicates the sensors are working
+    3. Stabilize camera by actuating the camera motors according to the gyro feed -- currently does not work
+    4. Obtain PID values:
+      - PID control for x position - XController
+      - PID control for altitude position - AltitudeController
+      - PID control for z position - ZController
+      - PID control for yaw - RotationController
+    5. Calculate motor inputs based on PID Controls
+    6. Set motor velocities based on calculated motor inputs
+  }
+}
+
+## Notes
+
+In the context of drones or aircraft, roll, pitch, and yaw are used to describe the orientation or rotation of the 
+vehicle in three-dimensional space. They are typically defined as follows:
+
+- Roll: Rotation around the longitudinal axis (usually the x-axis), which runs from the front to the back of the 
+vehicle. Imagine an airplane tilting its wings from side to side.
+- Pitch: Rotation around the lateral axis (usually the y-axis), which runs from one side of the vehicle to the other. 
+This motion is similar to nodding your head up and down.
+- Yaw: Rotation around the vertical axis (usually the z-axis), which runs from the top to the bottom of the vehicle. 
+Yawing is like turning your head from side to side to look left or right.
+
+So, in terms of a coordinate system, 
+  - roll could be associated with changes in the x-axis, 
+  - pitch would typically be associated with changes in the y-axis, and 
+  - yaw, would be associated with changes in the z-axis.
+
+## On adjustments
+
+To adjust your drone for better hovering based on the provided values, you can focus on the following parameters:
+
+1. Pitch and Roll: These angles should ideally be close to zero for the drone to hover level. If they are consistently 
+away from zero, adjust the pitch and roll controls to bring them closer to zero.
+2. Altitude: The altitude should be stable around your desired hover height. If it is drifting or fluctuating, adjust 
+the vertical thrust control (K_VERTICAL_THRUST) to stabilize the altitude.
+3. Pitch Acceleration and Roll Acceleration: These values should ideally be close to zero, indicating minimal angular 
+acceleration. If they are consistently high, it might indicate instability. Adjust the PID gains (kp_x, kd_x, kp_z, 
+kd_z) for pitch and roll to dampen the oscillations.
+4. Propeller Velocities: Monitor the propeller velocities for each corner of the drone. If one side is consistently 
+higher than the other, it could cause the drone to tilt. Adjust the corresponding control inputs to balance the 
+propeller speeds and level the drone.
+5. Yaw: Ensure that the yaw control is responsive and keeps the drone oriented as desired.
+
