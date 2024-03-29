@@ -110,15 +110,13 @@ public class DroneController extends Robot {
   private double computePitchInput(double pitch, double pitchVelocity, double pitchDisturbance, double errorX, double lastErrorX) {
     double dErrorX = errorX - lastErrorX;
     lastErrorX = errorX;
-    return (K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0)) - 5 * pitchVelocity + pitchDisturbance
-        + (KP_X * errorX) + (KD_X * dErrorX);
+    return (K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0)) - 5 * pitchVelocity + pitchDisturbance + (KP_X * errorX) + (KD_X * dErrorX);
   }
 
   private double computeRollInput(double roll, double rollVelocity, double rollDisturbance, double errorZ, double lastErrorZ) {
     double dErrorZ = errorZ - lastErrorZ;
     lastErrorZ = errorZ;
-    return (K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0)) + 5 * rollVelocity + rollDisturbance
-        + (KP_Z * errorZ) + (KD_Z * dErrorZ);
+    return (K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0)) + 5 * rollVelocity + rollDisturbance + (KP_Z * errorZ) + (KD_Z * dErrorZ);
   }
 
   private double computeVerticalInput(double altitude, double errorAltitude, double lastErrorAltitude) {
@@ -136,6 +134,13 @@ public class DroneController extends Robot {
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                    double pitch, double pitchVelocity, double pitchDisturbance, 
                                    double yaw, double yawDisturbance) {
+    double positionX = 0.0;
+    double positionZ = 0.0;
+    double lastErrorX = 0.0;
+    double lastErrorZ = 0.0;
+    double lastErrorAltitude = 0.0;
+    double lastErrorYaw = 0.0;
+
     double errorX = Math.min(Math.max(TARGET_X + positionX, -1.0), 1.0);
     double errorZ = Math.min(Math.max(TARGET_Z + positionZ, -1.0), 1.0);
     double errorAltitude = Math.min(Math.max(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0), 1.0);
