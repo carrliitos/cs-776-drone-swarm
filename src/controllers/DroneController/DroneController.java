@@ -9,6 +9,9 @@ public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   private static final double MAX_VELOCITY = 100;
   private static final double TARGET_ALTITUDE = 1.0;
+  private static final double TARGET_X = 0.0;
+  private static final double TARGET_Z = 0.0;
+  private static final double TARGET_YAW = -1;
 
   private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller, cameraRollMotor, cameraPitchMotor;
   private Motor motors[];
@@ -16,13 +19,15 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
-  
+  private CsvWriter positionCsvWriter;
+  private CsvWriter inputsCsvWriter;
+    
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.2; // Vertical offset where the robot actually targets to stabilize itself.
   private static final double K_VERTICAL_P = 2.0; // P constant of the vertical PID.
-  private static final double K_ROLL_P = 25.0; // P constant of the roll PID.
-  private static final double K_PITCH_P = 20.0; // P constant of the pitch PID.
+  private static final double K_ROLL_P = 20.0; // P constant of the roll PID.
+  private static final double K_PITCH_P = 22.5; // P constant of the pitch PID.
   
   public DroneController() {
     super();
@@ -56,6 +61,8 @@ public class DroneController extends Robot {
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
+    positionCsvWriter = new CsvWriter("../data/positions_data.csv");
+    inputsCsvWriter = new CsvWriter("../data/inputs_data.csv");
   }
   
   private void displayWelcomeMessage() {
@@ -80,10 +87,14 @@ public class DroneController extends Robot {
       final double roll = imu.getRollPitchYaw()[0];
       final double pitch = imu.getRollPitchYaw()[1];
       final double altitude = gps.getValues()[2];
+
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
 
-      return new double[]{roll, pitch, altitude, rollVelocity, pitchVelocity};
+      double[] positions = { roll, pitch, altitude, rollVelocity, pitchVelocity };
+      positionCsvWriter.writeData(positions);
+
+      return positions;
     } catch (Exception e) {
       System.err.println("Error retrieving robot state: " + e.getMessage());
       return new double[]{0.0, 0.0, 0.0, 0.0, 0.0}; // Default values
@@ -94,22 +105,20 @@ public class DroneController extends Robot {
     cameraRollMotor.setPosition(-0.115 * rollVelocity);
     cameraPitchMotor.setPosition(-0.1 * pitchVelocity);
   }
-  
+
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance) {
-    System.out.printf("Roll disturbance: %.8f %n", rollDisturbance);
-    System.out.printf("Roll velocity: %.8f %n", rollVelocity);
-    System.out.printf("Pitch disturbance: %.8f %n", pitchDisturbance);
-    System.out.printf("Pitch velocity: %.8f %n", pitchVelocity);
-    System.out.printf("Yaw disturbance: %.8f %n", yawDisturbance);
-    
-    final double rollInput = K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0) + rollVelocity + rollDisturbance;
-    final double pitchInput = K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0) + pitchVelocity + pitchDisturbance;
-    final double yawInput = yawDisturbance;
-    final double clampedDifferenceAltitude = Math.min(Math.max(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0), 1.0);
-    final double verticalInput = K_VERTICAL_P * Math.pow(clampedDifferenceAltitude, 3.0);
 
-    return new double[] { rollInput, pitchInput, yawInput, verticalInput };
+    final double pitchInput = K_PITCH_P * Math.min(Math.max(pitch, -1.0), 1.0) + pitchVelocity + pitchDisturbance;
+    final double rollInput = K_ROLL_P * Math.min(Math.max(roll, -1.0), 1.0) + rollVelocity + rollDisturbance;
+    final double yawInput = yawDisturbance;
+    final double clampedDiffAltitude = Math.min(Math.max(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0), 1.0);
+    final double verticalInput = K_VERTICAL_P * Math.pow(clampedDiffAltitude, 3);
+    
+    double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
+    inputsCsvWriter.writeData(allInputs);
+
+    return allInputs;
   }
   
   private void activateActuators(double verticalInput, double rollInput, double pitchInput, double yawInput) {
@@ -127,6 +136,12 @@ public class DroneController extends Robot {
   // Main control loop
   public void run() {
     displayWelcomeMessage();
+    String[] positionHeaders = { "currRoll", "currPitch", "currYaw", "currAltitude", "currRollVelocity", 
+                                 "currPitchVelocity", "currPositionX", "currPositionz" };
+    String[] inputHeaders = { "roll", "pitch", "yaw", "vertical" };
+    positionCsvWriter.writeHeaders(positionHeaders);
+    inputsCsvWriter.writeHeaders(inputHeaders);
+    
     while (step(TIME_STEP) != -1) {
       double rollDisturbance = 0.0;
       double pitchDisturbance = 0.0;
@@ -141,9 +156,9 @@ public class DroneController extends Robot {
       
       System.out.printf("Roll Current State: %.8f %n", roll);
       System.out.printf("Pitch Current State: %.8f %n", pitch);
-      System.out.printf("Altitude Current State: %.8f %n", altitude);
       System.out.printf("Roll Velocity Current State: %.8f %n", rollVelocity);
       System.out.printf("Pitch Velocity Current State: %.8f %n", pitchVelocity);
+      System.out.printf("Current Altitude: %.8f %n", altitude);
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -168,6 +183,8 @@ public class DroneController extends Robot {
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
       System.out.println("==============================");
     }
+    positionCsvWriter.close();
+    inputsCsvWriter.close();
   }
   
   public static void main(String[] args) {

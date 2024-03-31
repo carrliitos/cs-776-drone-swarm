@@ -3,6 +3,7 @@ documentation/recordings/*.mp4
 
 src/worlds/*.wbproj
 src/worlds/*.jpg
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -51,3 +51,34 @@ higher than the other, it could cause the drone to tilt. Adjust the correspondin
 propeller speeds and level the drone.
 5. Yaw: Ensure that the yaw control is responsive and keeps the drone oriented as desired.
 
+## General Order of Operations
+
+1. Start with Pitch and Roll:
+   - Begin by tuning the PID controllers for pitch and roll stabilization before moving on to yaw. This helps stabilize 
+   the drone's orientation along the horizontal axes.
+2. Proportional (P) Term:
+   - Start by setting all PID terms to zero except the P term.
+   - Increase the P term until the drone responds quickly to disturbances but without excessive oscillations or overshoot.
+   - If the drone oscillates or overshoots, reduce the P term.
+3. Integral (I) Term:
+   - Once you have a good P term, introduce the I term to eliminate any steady-state error.
+   - Increase the I term until any remaining offset is eliminated, but be cautious of introducing too much I term, which 
+   can lead to oscillations or instability.
+4. Derivative (D) Term:
+   - After tuning P and I terms, add the D term to dampen oscillations and reduce overshoot.
+   - Increase the D term until the drone's response is smooth and stable, but avoid excessive D term, which can lead to 
+   a jerky response.
+5. Iterative Tuning:
+   - After setting initial values for P, I, and D terms, iterate through the tuning process, making small adjustments to 
+   each term to improve performance.
+   - Continuously observe the drone's behavior and make adjustments based on its response.
+6. Yaw Control:
+   - Once pitch and roll are stable, move on to tuning the yaw controller.
+   - Follow a similar process as for pitch and roll, adjusting the P, I, and D terms to achieve stable and responsive 
+   yaw control.
+7. Coordinate Axis Interaction:
+   - Throughout the tuning process, consider the interaction between the different axes (roll, pitch, yaw) and adjust 
+   the PID terms accordingly to ensure overall stability and performance.
+8. Final Adjustments:
+   - Fine-tune the PID constants based on flight testing and real-world performance to achieve the desired balance 
+   between responsiveness and stability.
