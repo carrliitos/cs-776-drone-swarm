@@ -86,12 +86,15 @@ public class DroneController extends Robot {
     try {
       final double roll = imu.getRollPitchYaw()[0];
       final double pitch = imu.getRollPitchYaw()[1];
+
+      final double posX = gps.getValues()[0];
+      final double posY = gps.getValues()[1];
       final double altitude = gps.getValues()[2];
 
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
 
-      double[] positions = { roll, pitch, altitude, rollVelocity, pitchVelocity };
+      double[] positions = { roll, pitch, posX, posY, altitude, rollVelocity, pitchVelocity };
       positionCsvWriter.writeData(positions);
 
       return positions;
@@ -136,9 +139,8 @@ public class DroneController extends Robot {
   // Main control loop
   public void run() {
     displayWelcomeMessage();
-    String[] positionHeaders = { "currRoll", "currPitch", "currYaw", "currAltitude", "currRollVelocity", 
-                                 "currPitchVelocity", "currPositionX", "currPositionz" };
-    String[] inputHeaders = { "roll", "pitch", "yaw", "vertical" };
+    String[] positionHeaders = { "ROLL", "PITCH", "POSITION_X", "POSITION_Y", "ALTITUDE", "ROLL_VELOCITY", "PITCH_VELOCITY" };
+    String[] inputHeaders = { "ROLL", "PITCH", "YAW", "VERTICAL" };
     positionCsvWriter.writeHeaders(positionHeaders);
     inputsCsvWriter.writeHeaders(inputHeaders);
     
@@ -150,9 +152,11 @@ public class DroneController extends Robot {
       double[] robotState = getRobotState();
       double roll = robotState[0];
       double pitch = robotState[1];
-      double altitude = robotState[2];
-      double rollVelocity = robotState[3];
-      double pitchVelocity = robotState[4];
+      double posX = robotState[2];
+      double posY = robotState[3];
+      double altitude = robotState[4];
+      double rollVelocity = robotState[5];
+      double pitchVelocity = robotState[6];
       
       System.out.printf("Roll Current State: %.8f %n", roll);
       System.out.printf("Pitch Current State: %.8f %n", pitch);
