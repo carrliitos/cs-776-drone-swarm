@@ -82,3 +82,10 @@ propeller speeds and level the drone.
 8. Final Adjustments:
    - Fine-tune the PID constants based on flight testing and real-world performance to achieve the desired balance 
    between responsiveness and stability.
+
+## Update project
+
+git branch -a
+git checkout development
+git fetch
+git pull
