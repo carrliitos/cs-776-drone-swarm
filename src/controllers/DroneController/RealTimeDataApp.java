@@ -14,9 +14,9 @@ public class RealTimeDataApp {
   private static DefaultTableModel tableModel;
   private static JTable table;
 
-  public RealTimeDataApp() {
+  public RealTimeDataApp(String title) {
     SwingUtilities.invokeLater(() -> {
-      JFrame frame = new JFrame("Real-Time Data");
+      JFrame frame = new JFrame(title);
       frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
       frame.addWindowListener(new WindowAdapter() {
         @Override
