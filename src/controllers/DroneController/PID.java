@@ -17,17 +17,12 @@ public class PID {
     this.integral = 0;
     this.prevInput = 0;
     this.prevTime = 0;
-    this.autoMode = true;
     this.lastOutput = 0;
   }
 
   public double update(double input, double dt) {
-    if (!autoMode) {
-      return lastOutput;
-    }
-
     double error = setpoint - input;
-    double dInput = input - prevInput;
+    double dInput = (input - prevInput) / dt;
     double now = System.currentTimeMillis() / 1000.0;  // Current time in seconds
     double deltaTime = now - prevTime;
 
@@ -45,29 +40,22 @@ public class PID {
     integral = clamp(integral, -1, 1);  // Limit integral term to prevent windup
 
     // Compute derivative term
-    double derivative = 0;
-    if (dt > 0) {
-      derivative = -kd * dInput / dt;
-    }
+    double derivative = -kd * dInput;
 
     // Compute output
     double output = proportional + integral + derivative;
     output = clamp(output, -1, 1);  // Limit output to output limits
 
     // Update state variables
-    lastOutput = output;
-    prevInput = input;
-    prevTime = now;
+    this.lastOutput = output;
+    this.prevInput = input;
+    this.prevTime = now;
 
     return output;
   }
 
   private double clamp(double value, double low, double high) {
     return value < low ? low : (value > high ? high : value);
-  }
-
-  public void setAutoMode(boolean autoMode) {
-    this.autoMode = autoMode;
   }
 
   public void setPoint(double setpoint) {
