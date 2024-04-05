@@ -4,14 +4,10 @@ import com.cyberbotics.webots.controller.LED;
 import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
+import com.cyberbotics.webots.controller.Compass;
 
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
-  private static final double MAX_VELOCITY = 100;
-  private static final double TARGET_ALTITUDE = 1.0;
-  private static final double TARGET_X = 0.0;
-  private static final double TARGET_Y = 0.0;
-  private static final double TARGET_YAW = -1;
 
   private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller, cameraRollMotor, cameraPitchMotor;
   private Motor motors[];
@@ -19,24 +15,42 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
+  private Compass compass;
   private CsvWriter positionCsvWriter;
   private CsvWriter inputsCsvWriter;
+  private PID pitchPID;
+  private PID rollPID;
+  private PID throttlePID;
+  private PID yawPID;
     
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
-  private static final double K_VERTICAL_OFFSET = 0.6; // Vertical offset where the robot actually targets to stabilize itself.
-  private static final double K_VERTICAL_P = 2.0; // P constant of the vertical PID.
-  private static final double K_POSITION_P = 0.05; // P constant of the position PID.
-  private static final double K_ROLL_P = 20.0; // P constant of the roll PID.
-  private static final double K_PITCH_P = 22.5; // P constant of the pitch PID.
-  
+  private static final double K_ROLL_P = 0.0;
+  private static final double K_PITCH_P = 0.0;
+  private static final double TARGET_X = 0.0;
+  private static final double TARGET_Y = 0.0;
+  private static final double TARGET_ALTITUDE = 1.0;
+
+  private static final double pitchKp = 0.0;
+  private static final double pitchKi = 0.0;
+  private static final double pitchKd = 0.0;
+
+  private static final double rollKp = 0.0;
+  private static final double rollKi = 0.0;
+  private static final double rollKd = 0.0;
+
+  private static final double throttleKp = 0.0;
+  private static final double throttleKi = 0.0;
+  private static final double throttleKd = 0.0;
+
+  private static final double yawKp = 0.0;
+  private static final double yawKi = 0.0;
+  private static final double yawKd = 0.0;
+  private static final double yawSetpoint = 0.0;
+
   public DroneController() {
     super();
     initializeDevices();
-  }
-  
-  public static double clamp(double value, double low, double high) {
-    return value < low ? low : (value > high ? high : value);
   }
   
   private void initializeDevices() {
@@ -46,6 +60,8 @@ public class DroneController extends Robot {
     gps.enable(TIME_STEP);
     gyro = getGyro("gyro");
     gyro.enable(TIME_STEP);
+    compass = getCompass("compass");
+    compass.enable(TIME_STEP);
     frontLeftLED = new LED("front left led");
     frontRightLED = new LED("front right led");
     frontRightPropeller = getMotor("front right propeller");
@@ -61,13 +77,17 @@ public class DroneController extends Robot {
     
     for (Motor motor : motors) {
       motor.setPosition(Double.POSITIVE_INFINITY);
-      motor.setVelocity(1); // 10% of velocity to start
+      motor.setVelocity(1);
     }
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
     positionCsvWriter = new CsvWriter("../data/positions_data.csv");
     inputsCsvWriter = new CsvWriter("../data/inputs_data.csv");
+    pitchPID = new PID(pitchKp, pitchKi, pitchKd, 0.0);
+    rollPID = new PID(rollKp, rollKi, rollKd, 0.0);
+    throttlePID = new PID(throttleKp, throttleKi, throttleKd, 0.0);
+    yawPID = new PID(yawKp, yawKi, yawKd, yawSetpoint);
   }
   
   private void displayWelcomeMessage() {
@@ -91,15 +111,16 @@ public class DroneController extends Robot {
     try {
       final double roll = imu.getRollPitchYaw()[0];
       final double pitch = imu.getRollPitchYaw()[1];
+      final double yaw = imu.getRollPitchYaw()[2];
 
-      final double posX = gps.getValues()[0];
-      final double posY = gps.getValues()[1];
-      final double altitude = gps.getValues()[2];
+      final double xGPS = gps.getValues()[0];
+      final double yGPS = gps.getValues()[1];
+      final double zGPS = gps.getValues()[2];
 
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
 
-      double[] positions = { roll, pitch, posX, posY, altitude, rollVelocity, pitchVelocity };
+      double[] positions = { roll, pitch, yaw, xGPS, yGPS, zGPS, rollVelocity, pitchVelocity };
       positionCsvWriter.writeData(positions);
 
       return positions;
@@ -114,29 +135,17 @@ public class DroneController extends Robot {
     cameraPitchMotor.setPosition(-0.1 * pitchVelocity);
   }
 
-  private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
-                                 double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance,
-                                 double xPos, double yPos) {
+  private double[] computeInputs(double roll, double rollVelocity, double pitch, double pitchVelocity, 
+                                 double yaw, double xGPS, double yGPS, double zGPS) {
+    double verticalInput = throttlePID.update(zGPS, 0.0);
+    double yawInput = yawPID.update(yaw, 0.0);
 
-    double pitchInput = K_PITCH_P * clamp(pitch, -1.0, 1.0) + pitchVelocity + pitchDisturbance;
-    double rollInput = K_ROLL_P * clamp(roll, -1.0, 1.0) + rollVelocity + rollDisturbance;
-    final double yawInput = yawDisturbance;
-    
-    // Calculate position error from the target position (0, 0)
-    double errorX = TARGET_X - xPos;
-    double errorY = TARGET_Y - yPos;
-    
-    // Calculate the velocity adjustments based on the errors
-    double velocityX = K_POSITION_P * errorX;
-    double velocityY = K_POSITION_P * errorY;
+    rollPID.setPoint(TARGET_X);
+    pitchPID.setPoint(TARGET_Y);
 
-    final double clampedDiffAltitude = clamp(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0, 1.0);
-    final double verticalInput = K_VERTICAL_P * Math.pow(clampedDiffAltitude, 3);
-    
-    // Apply the position control adjustments to the pitch and roll inputs
-    pitchInput += velocityY;
-    rollInput += velocityX;
-    
+    double rollInput = K_ROLL_P * roll + rollVelocity + rollPID.update(xGPS, 0.0);
+    double pitchInput = K_PITCH_P * pitch + pitchVelocity - pitchPID.update(-yGPS, 0.0);
+
     double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
     inputsCsvWriter.writeData(allInputs);
 
@@ -158,7 +167,7 @@ public class DroneController extends Robot {
   // Main control loop
   public void run() {
     displayWelcomeMessage();
-    String[] positionHeaders = { "ROLL", "PITCH", "POSITION_X", "POSITION_Y", "ALTITUDE", "ROLL_VELOCITY", "PITCH_VELOCITY" };
+    String[] positionHeaders = { "ROLL", "PITCH", "YAW", "GPS_X", "GPS_Y", "GPS_Z", "ROLL_VELOCITY", "PITCH_VELOCITY" };
     String[] inputHeaders = { "ROLL", "PITCH", "YAW", "VERTICAL" };
     positionCsvWriter.writeHeaders(positionHeaders);
     inputsCsvWriter.writeHeaders(inputHeaders);
@@ -171,17 +180,17 @@ public class DroneController extends Robot {
       double[] robotState = getRobotState();
       double roll = robotState[0];
       double pitch = robotState[1];
-      double posX = robotState[2];
-      double posY = robotState[3];
-      double altitude = robotState[4];
-      double rollVelocity = robotState[5];
-      double pitchVelocity = robotState[6];
+      double yaw = robotState[2];
+      double xGPS = robotState[3];
+      double yGPS = robotState[4];
+      double zGPS = robotState[5];
+      double rollVelocity = robotState[6];
+      double pitchVelocity = robotState[7];
       
       System.out.printf("Roll Current State: %.8f %n", roll);
       System.out.printf("Pitch Current State: %.8f %n", pitch);
       System.out.printf("Roll Velocity Current State: %.8f %n", rollVelocity);
       System.out.printf("Pitch Velocity Current State: %.8f %n", pitchVelocity);
-      System.out.printf("Current Altitude: %.8f %n", altitude);
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -190,9 +199,7 @@ public class DroneController extends Robot {
       stabilizeCamera(rollVelocity, pitchVelocity);
 
       // Compute the roll, pitch, yaw and vertical inputs.
-      double[] rpyvInputs = computeInputs(roll, altitude, rollVelocity, rollDisturbance, 
-                                          pitch, pitchVelocity, pitchDisturbance, yawDisturbance,
-                                          posX, posY);
+      double[] rpyvInputs = computeInputs(roll, rollVelocity, pitch, pitchVelocity, yaw, xGPS, yGPS, zGPS);
       double rollInput = rpyvInputs[0];
       double pitchInput = rpyvInputs[1];
       double yawInput = rpyvInputs[2];
