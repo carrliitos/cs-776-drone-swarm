@@ -7,11 +7,9 @@ import com.cyberbotics.webots.controller.Gyro;
 
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
-  private static final double MAX_VELOCITY = 100;
   private static final double TARGET_ALTITUDE = 1.0;
   private static final double TARGET_X = 0.0;
   private static final double TARGET_Y = 0.0;
-  private static final double TARGET_YAW = -1;
 
   private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller, cameraRollMotor, cameraPitchMotor;
   private Motor motors[];
