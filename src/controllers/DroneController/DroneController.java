@@ -71,7 +71,6 @@ public class DroneController extends Robot {
   }
   
   private void displayWelcomeMessage() {
-    System.out.println("Starting the drone...");
     // Wait one second
     double previousTime = 0.0;
     while (step(TIME_STEP) != -1) {
@@ -178,12 +177,6 @@ public class DroneController extends Robot {
       double altitude = robotState[4];
       double rollVelocity = robotState[5];
       double pitchVelocity = robotState[6];
-      
-      System.out.printf("Roll Current State: %.8f %n", roll);
-      System.out.printf("Pitch Current State: %.8f %n", pitch);
-      System.out.printf("Roll Velocity Current State: %.8f %n", rollVelocity);
-      System.out.printf("Pitch Velocity Current State: %.8f %n", pitchVelocity);
-      System.out.printf("Current Altitude: %.8f %n", altitude);
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -200,14 +193,8 @@ public class DroneController extends Robot {
       double yawInput = rpyvInputs[2];
       double verticalInput = rpyvInputs[3];
       
-      System.out.printf("Roll Input: %.8f %n", rollInput);
-      System.out.printf("Pitch Input: %.8f %n", pitchInput);
-      System.out.printf("Yaw Input: %.8f %n", yawInput);
-      System.out.printf("Vertical Input: %.8f %n", verticalInput);
-
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
-      System.out.println("==============================");
     }
     positionCsvWriter.close();
     inputsCsvWriter.close();
