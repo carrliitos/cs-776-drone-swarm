@@ -29,7 +29,8 @@ public class CsvWriter {
   public void writeData(double[] data) {
     try {
       for (int i = 0; i < data.length; i++) {
-        writer.append(String.valueOf(data[i]));
+        String formattedValue = String.format("%.8f", data[i]);
+        writer.append(formattedValue);
         if (i < data.length - 1) {
           writer.append(',');
         }
