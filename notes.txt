@@ -89,3 +89,18 @@ git branch -a
 git checkout development
 git fetch
 git pull
+
+## Terminal
+
+$ /usr/local/webots/webots-controller --help
+
+[1] Run the simulation in Webots -- ensure the controller is set to <extern>
+[2] Run command to link controller to robot:
+$ /usr/local/webots/webots-controller src/controllers/DroneController/DroneController.class
+
+### When making changes to robot source code
+
+[1] Complile:
+$ javac -cp /usr/local/webots/lib/controller/java/Controller.jar src/controllers/DroneController/DroneController.java src/controllers/DroneController/CsvWriter.java src/controllers/DroneController/RealTimeDataApp.java
+[2] Then run simulation
+[3] Then run controller in terminal
