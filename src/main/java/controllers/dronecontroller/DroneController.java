@@ -5,6 +5,8 @@ import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
 
+import java.io.IOException;
+
 public class DroneController extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   private static final double TARGET_ALTITUDE = 1.0;
@@ -65,9 +67,13 @@ public class DroneController extends Robot {
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
-    positionCsvWriter = new CsvWriter("../data/positions_data.csv");
-    inputsCsvWriter = new CsvWriter("../data/inputs_data.csv");
-    positionsDataVisualizer = new RealTimeDataApp("Current Positions");
+    try {
+      positionCsvWriter = new CsvWriter("../data/positions_data.csv");
+      inputsCsvWriter = new CsvWriter("../data/inputs_data.csv");
+      positionsDataVisualizer = new RealTimeDataApp("Current Positions");
+    } catch (IOException e) {
+      System.err.println("Error creating CsvWriter: " + e.getMessage());
+    }
   }
   
   private void displayWelcomeMessage() {
@@ -196,8 +202,12 @@ public class DroneController extends Robot {
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
     }
-    positionCsvWriter.close();
-    inputsCsvWriter.close();
+    try {
+      positionCsvWriter.close();
+      inputsCsvWriter.close();
+    } catch (IOException e) {
+      System.err.println("Error closing CsvWriter: " + e.getMessage());
+    }
   }
   
   public static void main(String[] args) {
