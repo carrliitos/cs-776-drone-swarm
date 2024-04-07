@@ -202,8 +202,12 @@ public class DroneController extends Robot {
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
     }
-    positionCsvWriter.close();
-    inputsCsvWriter.close();
+    try {
+      positionCsvWriter.close();
+      inputsCsvWriter.close();
+    } catch (IOException e) {
+      System.err.println("Error closing CsvWriter: " + e.getMessage());
+    }
   }
   
   public static void main(String[] args) {

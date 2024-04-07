@@ -45,11 +45,14 @@ public class CsvWriter {
     }
   }
 
-  public void close() {
+  public void close() throws IOException {
     try {
-      writer.close();
+      if (writer != null) {
+        writer.close();
+      }
     } catch (IOException e) {
       System.err.println("Error closing CsvWriter: " + e.getMessage());
+      throw e;
     }
   }
 }
