@@ -1,15 +1,19 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CsvWriter {
   private FileWriter writer;
 
-  public CsvWriter(String outputFile) {
-    try {
-      writer = new FileWriter(outputFile);
-    } catch (IOException e) {
-      System.err.println("Error creating CsvWriter: " + e.getMessage());
+  public CsvWriter(String outputFile) throws IOException {
+    Path outputPath = Paths.get(outputFile);
+    if (!Files.exists(outputPath.getParent())) {
+      Files.createDirectories(outputPath.getParent());
     }
+
+    writer = new FileWriter(outputFile);
   }
 
   public void writeHeaders(String[] headers) {
