@@ -5,6 +5,8 @@ src/worlds/*.wbproj
 src/worlds/*.jpg
 *.csv
 
+.project
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
