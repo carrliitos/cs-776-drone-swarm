@@ -12,7 +12,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 
 public class CsvWriterTest {
-  private String outputFile = "../data/test.csv";
+  private String outputFile = System.getProperty("user.dir") + "src/test/resources/data/data/test.csv";;
 
   private class CsvWriterMock extends CsvWriter {
     public CsvWriterMock(String outputFile) throws IOException {
@@ -37,7 +37,7 @@ public class CsvWriterTest {
 
   @Test
   public void testCsvWriterInvalidPath() {
-    String invalidOutputFile = "../data/nonexistent-directory/test.csv";
+    String invalidOutputFile = System.getProperty("user.dir") + "src/test/resources/data/nonexistent-directory/test.csv";
     try {
       CsvWriter csvWriter = new CsvWriter(invalidOutputFile);
     } catch (IOException e) {
