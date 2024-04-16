@@ -27,15 +27,16 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.17487929730817975 0.7237029248614424 -0.6675861801445493 0.7758003434234048
-  position -3.5185158858011136 2.372781629210384 2.6416167536195627
+  position -5.334274327938215 3.4565109583567244 3.999031480534267
   near 0.2
-  follow "Mavic 2 PRO"
+  follow "droneCarlitos"
   followSmoothness 0.2
 }
 TexturedBackground {
   luminosity 3
 }
 TexturedBackgroundLight {
+  texture "dawn_cloudy_empty"
 }
 Floor {
   size 400 400
@@ -84,6 +85,23 @@ SmallManor {
 }
 SquareManhole {
   translation 0 0 -0.03
+  name "manhole-carlitos"
+}
+SquareManhole {
+  translation 0 -1 -0.03
+  name "manhole-talba"
+}
+SquareManhole {
+  translation 1 -0.5 -0.03
+  name "manhole-connor"
+}
+SquareManhole {
+  translation 0 1 -0.03
+  name "manhole-john"
+}
+SquareManhole {
+  translation 1 0.5 -0.03
+  name "manhole-rodrigue"
 }
 TeslaModel3Simple {
   translation -41.5139 4.34169 0.31
@@ -146,6 +164,59 @@ Forest {
 Mavic2Pro {
   translation 0 0 0.1
   rotation 0 0 1 3.141590777218456
+  name "droneCarlitos"
+  controller "<extern>"
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+Mavic2Pro {
+  translation 0 -1 0.1
+  rotation 0 0 1 3.141590777218456
+  name "droneTalba"
+  controller "<extern>"
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+Mavic2Pro {
+  translation 1 -0.5 0.1
+  rotation 0 0 1 3.141590777218456
+  name "droneConnor"
+  controller "<extern>"
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+Mavic2Pro {
+  translation 0 1 0.1
+  rotation 0 0 1 3.141590777218456
+  name "droneJohn"
+  controller "<extern>"
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+Mavic2Pro {
+  translation 1 0.5 0.1
+  rotation 0 0 1 3.141590777218456
+  name "droneRodrigue"
   controller "<extern>"
   cameraSlot [
     Camera {
