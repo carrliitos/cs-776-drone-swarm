@@ -37,7 +37,7 @@ public class CsvWriterTest {
 
   @Test
   public void testCsvWriterInvalidPath() {
-    String invalidOutputFile = System.getProperty("user.dir") + "src/test/resources/data/nonexistent-directory/test.csv";
+    String invalidOutputFile = System.getProperty("user.dir") + "/src/test/resources/data/nonexistent-directory/test.csv";
     try {
       CsvWriter csvWriter = new CsvWriter(invalidOutputFile);
     } catch (IOException e) {
