@@ -32,42 +32,38 @@ public class PID {
     double deltaTime = now - prevTime;
 
     if (dt == 0.0) {
-      dt = (now - prevTime) != 0 ? now - prevTime : 1e-16;
+      dt = deltaTime != 0 ? deltaTime : 1e-16;
     } else if (dt <= 0) {
       throw new IllegalArgumentException("dt has negative value " + dt + ", must be positive");
     }
 
-    if (deltaTime >= dt) {
-      // Compute proportional term
-      double proportional = kp * error;
+    // Compute proportional term
+    double proportional = kp * error;
 
-      // Compute integral term
-      integral += ki * error * deltaTime;
-      integral = clamp(integral, -1, 1);  // Limit integral term to prevent windup
+    // Compute integral term
+    integral += ki * error * dt;
+    integral = clamp(integral, -1, 1);  // Limit integral term to prevent windup
 
-      // Compute derivative term
-      double derivative = 0;
-      if (deltaTime > 0) {
-        derivative = -kd * dInput / deltaTime;
-      }
-
-      // Compute output
-      double output = proportional + integral + derivative;
-      output = clamp(output, -1, 1);  // Limit output to output limits
-
-      // Update state variables
-      lastOutput = output;
-      prevInput = input;
-      prevTime = now;
-
-      return output;
-    } else {
-      return lastOutput;
+    // Compute derivative term
+    double derivative = 0;
+    if (dt > 0) {
+      derivative = -kd * dInput / dt;
     }
+
+    // Compute output
+    double output = proportional + integral + derivative;
+    output = clamp(output, -1, 1);  // Limit output to output limits
+
+    // Update state variables
+    lastOutput = output;
+    prevInput = input;
+    prevTime = now;
+
+    return output;
   }
 
-  private double clamp(double value, double min, double max) {
-    return Math.max(min, Math.min(max, value));
+  private double clamp(double value, double low, double high) {
+    return value < low ? low : (value > high ? high : value);
   }
 
   public void setAutoMode(boolean autoMode) {

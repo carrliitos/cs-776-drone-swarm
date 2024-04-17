@@ -1,15 +1,19 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CsvWriter {
   private FileWriter writer;
 
-  public CsvWriter(String outputFile) {
-    try {
-      writer = new FileWriter(outputFile);
-    } catch (IOException e) {
-      System.err.println("Error creating CsvWriter: " + e.getMessage());
+  public CsvWriter(String outputFile) throws IOException {
+    Path outputPath = Paths.get(outputFile);
+    if (!Files.exists(outputPath.getParent())) {
+      Files.createDirectories(outputPath.getParent());
     }
+
+    writer = new FileWriter(outputFile);
   }
 
   public void writeHeaders(String[] headers) {
@@ -29,7 +33,8 @@ public class CsvWriter {
   public void writeData(double[] data) {
     try {
       for (int i = 0; i < data.length; i++) {
-        writer.append(String.valueOf(data[i]));
+        String formattedValue = String.format("%.8f", data[i]);
+        writer.append(formattedValue);
         if (i < data.length - 1) {
           writer.append(',');
         }
@@ -40,11 +45,14 @@ public class CsvWriter {
     }
   }
 
-  public void close() {
+  public void close() throws IOException {
     try {
-      writer.close();
+      if (writer != null) {
+        writer.close();
+      }
     } catch (IOException e) {
       System.err.println("Error closing CsvWriter: " + e.getMessage());
+      throw e;
     }
   }
 }
