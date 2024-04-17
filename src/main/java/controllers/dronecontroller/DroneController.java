@@ -202,8 +202,6 @@ public class DroneController extends Robot {
     } catch (IOException e) {
       System.err.println("Error closing CsvWriter: " + e.getMessage());
     }
-    positionCsvWriter.close();
-    inputsCsvWriter.close();
   }
   
   public static void main(String[] args) {
