@@ -8,8 +8,6 @@ import com.cyberbotics.webots.controller.Gyro;
 import java.io.IOException;
 
 public class DroneController extends Robot {
-  private String positionsCSVFile = System.getProperty("user.dir") + "/data/positions.csv";
-  private String inputsCSVFile = System.getProperty("user.dir") + "/data/inputs.csv";
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   private static final double TARGET_ALTITUDE = 1.0;
   private static final double TARGET_X = 0.0;
@@ -21,8 +19,6 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
-  private CsvWriter positionCsvWriter;
-  private CsvWriter inputsCsvWriter;
   private RealTimeDataApp positionsDataVisualizer;
   private PID rollPID;
   private PID pitchPID;
@@ -32,15 +28,15 @@ public class DroneController extends Robot {
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.6; // Vertical offset where the robot actually targets to stabilize itself.
   private static final double K_VERTICAL_P = 2.0;
-  private static final double K_ROLL_P = 1.0;
+  private static final double K_ROLL_P = 0.1;
   private static final double K_ROLL_I = 0.0;
-  private static final double K_ROLL_D = 1.0;
-  private static final double K_PITCH_P = 0.0;
+  private static final double K_ROLL_D = 0.1;
+  private static final double K_PITCH_P = 0.1;
   private static final double K_PITCH_I = 0.0;
-  private static final double K_PITCH_D = 0.0;
-  private static final double K_YAW_P = 0.0;
+  private static final double K_PITCH_D = 0.1;
+  private static final double K_YAW_P = 0.1;
   private static final double K_YAW_I = 0.0;
-  private static final double K_YAW_D = 0.0;
+  private static final double K_YAW_D = 0.1;
   
   public DroneController() {
     super();
@@ -52,7 +48,6 @@ public class DroneController extends Robot {
   }
   
   private void initializeDevices() {
-    System.out.println(inputsCSVFile);
     imu = getInertialUnit("inertial unit");
     imu.enable(TIME_STEP);
     gps = getGPS("gps");
@@ -79,15 +74,10 @@ public class DroneController extends Robot {
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
-    try {
-      positionCsvWriter = new CsvWriter(positionsCSVFile);
-      inputsCsvWriter = new CsvWriter(inputsCSVFile);
-    } catch (IOException e) {
-      System.err.println("Error creating a new CsvWriter: " + e.getMessage());
-    }
-    positionsDataVisualizer = new RealTimeDataApp("Drone State Visualization");
+    String[] labels = { "Roll", "Pitch", "Yaw", "Vertical" };
+    positionsDataVisualizer = new RealTimeDataApp("Drone State Visualization", labels);
 
-    rollPID = new PID(K_ROLL_P, K_ROLL_I, K_ROLL_D, 0.0);
+    rollPID = new PID(K_ROLL_P, K_ROLL_I, K_ROLL_D, 100.0);
     pitchPID = new PID(K_PITCH_P, K_PITCH_I, K_PITCH_D, 0.0);
     yawPID = new PID(K_YAW_P, K_YAW_I, K_YAW_D, 0.0);
   }
@@ -119,7 +109,7 @@ public class DroneController extends Robot {
       final double rollVelocity = gyro.getValues()[0];
       final double pitchVelocity = gyro.getValues()[1];
       double[] positions = { roll, pitch, yaw, posX, posY, altitude, rollVelocity, pitchVelocity };
-      positionCsvWriter.writeData(positions);
+
       return positions;
     } catch (Exception e) {
       System.err.println("Error retrieving robot state: " + e.getMessage());
@@ -135,7 +125,7 @@ public class DroneController extends Robot {
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, 
                                  double yaw, double yawDisturbance, double xPos, double yPos) {
-    double dt = 0.1;
+    double dt = 0.01;
     double deltaX = TARGET_X - xPos;
     double deltaY = TARGET_Y - yPos;
     double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -156,9 +146,8 @@ public class DroneController extends Robot {
     final double clampedDiffAltitude = clamp(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0, 1.0);
     final double verticalInput = K_VERTICAL_P * Math.pow(clampedDiffAltitude, 3);
     double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
-    inputsCsvWriter.writeData(allInputs);
 
-    positionsDataVisualizer.visualize(rollInput);
+    positionsDataVisualizer.visualize(allInputs);
 
     return allInputs;
   }
@@ -178,11 +167,7 @@ public class DroneController extends Robot {
   // Main control loop
   public void run() {
     displayWelcomeMessage();
-    String[] positionHeaders = { "ROLL", "PITCH", "YAW", "POSITION_X", "POSITION_Y", "ALTITUDE", "ROLL_VELOCITY", "PITCH_VELOCITY" };
-    String[] inputHeaders = { "ROLL", "PITCH", "YAW", "VERTICAL" };
-    positionCsvWriter.writeHeaders(positionHeaders);
-    inputsCsvWriter.writeHeaders(inputHeaders);
-    
+
     while (step(TIME_STEP) != -1) {
       double rollDisturbance = 0.0;
       double pitchDisturbance = 0.0;
@@ -215,12 +200,6 @@ public class DroneController extends Robot {
       
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
-    }
-    try {
-      positionCsvWriter.close();
-      inputsCsvWriter.close();
-    } catch (IOException e) {
-      System.err.println("Error closing CsvWriter: " + e.getMessage());
     }
   }
   
