@@ -6,11 +6,11 @@ import java.util.List;
 public class RealTimeDataApp {
   private static final String X_AXIS_LABEL = "Time";
   private static final String Y_AXIS_LABEL = "Signals";
-  private static final int WIDTH = 1000;
-  private static final int HEIGHT = 600;
+  private static final int WIDTH = 500;
+  private static final int HEIGHT = 300;
   private List<Double> xData = new ArrayList<>();
   private List<List<Double>> yDataList = new ArrayList<>();
-  private int maxDataPoints = 100; // Maximum number of data points to display
+  private int maxDataPoints = 50; // Maximum number of data points to display
   private int currentDataIndex = 0;
   private double Y_MIN = -10;
   private double Y_MAX = 10;
