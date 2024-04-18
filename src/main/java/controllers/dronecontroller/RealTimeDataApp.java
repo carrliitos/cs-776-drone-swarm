@@ -6,11 +6,11 @@ import java.util.List;
 public class RealTimeDataApp {
   private static final String X_AXIS_LABEL = "Time";
   private static final String Y_AXIS_LABEL = "Signals";
-  private static final int WIDTH = 500;
-  private static final int HEIGHT = 300;
+  private static final int WIDTH = 1000;
+  private static final int HEIGHT = 500;
   private List<Double> xData = new ArrayList<>();
   private List<List<Double>> yDataList = new ArrayList<>();
-  private int maxDataPoints = 50; // Maximum number of data points to display
+  private int maxDataPoints = 100; // Maximum number of data points to display
   private int currentDataIndex = 0;
   private double Y_MIN = -10;
   private double Y_MAX = 10;
@@ -43,6 +43,7 @@ public class RealTimeDataApp {
   private void plotData(Graphics g, String[] labels) {
     if (!xData.isEmpty()) {
       Graphics2D g2d = (Graphics2D) g.create();
+      g2d.setStroke(new BasicStroke(2.0f));
       double xMin = xData.get(0);
       double xMax = xData.get(xData.size() - 1);
       double yMin = Y_MIN;
@@ -91,13 +92,16 @@ public class RealTimeDataApp {
         g2d.drawLine(WIDTH - 5, y, WIDTH + 5, y);
         g2d.drawString(String.format("%.0f", yTick), -HEIGHT + 10, y + 5);
       }
-
-      // Draw (0, 0) axis label
-      g2d.setColor(Color.BLACK);
-      int zeroX = (int) (-xMin * xScale);
-      int zeroY = HEIGHT - (int) (-yMin * yScale);
-      g2d.drawString("(0, 0)", zeroX + 5, zeroY - 5);
-
+      g2d.setColor(Color.GRAY);
+      int y0 = HEIGHT - (int) ((0 - yMin) * yScale);
+      int yPosLine = HEIGHT - (int) ((5 - yMin) * yScale);
+      int yNegLine = HEIGHT - (int) ((-5 - yMin) * yScale);
+      g2d.drawLine(0, y0, WIDTH, y0);
+      g2d.drawString("y=0", 5, y0 - 5);
+      g2d.drawLine(0, yPosLine, WIDTH, yPosLine);
+      g2d.drawString("y=5", 5, yPosLine - 5);
+      g2d.drawLine(0, yNegLine, WIDTH, yNegLine);
+      g2d.drawString("y=5", 5, yNegLine - 5);
       g2d.dispose();
     } else {
       Graphics2D g2d = (Graphics2D) g.create();
