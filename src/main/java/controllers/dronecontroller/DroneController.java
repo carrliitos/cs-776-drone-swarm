@@ -12,6 +12,7 @@ public class DroneController extends Robot {
   private static final double TARGET_ALTITUDE = 1.0;
   private static final double TARGET_X = 0.0;
   private static final double TARGET_Y = 0.0;
+  private static final double TARGET_YAW = 0.0;
 
   private Motor frontRightPropeller, frontLeftPropeller, rearRightPropeller, rearLeftPropeller, cameraRollMotor, cameraPitchMotor;
   private Motor motors[];
@@ -27,16 +28,19 @@ public class DroneController extends Robot {
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.6; // Vertical offset where the robot actually targets to stabilize itself.
-  private static final double K_VERTICAL_P = 2.0;
+
+  private static final double K_VERTICAL_P = 0.1;
   private static final double K_ROLL_P = 0.1;
-  private static final double K_ROLL_I = 0.0;
-  private static final double K_ROLL_D = 0.1;
   private static final double K_PITCH_P = 0.1;
-  private static final double K_PITCH_I = 0.0;
-  private static final double K_PITCH_D = 0.1;
   private static final double K_YAW_P = 0.1;
+
+  private static final double K_PITCH_I = 0.0;
+  private static final double K_ROLL_I = 0.0;
   private static final double K_YAW_I = 0.0;
-  private static final double K_YAW_D = 0.1;
+
+  private static final double K_ROLL_D = 0.0;
+  private static final double K_PITCH_D = 0.0;
+  private static final double K_YAW_D = 0.0;
   
   public DroneController() {
     super();
@@ -75,7 +79,7 @@ public class DroneController extends Robot {
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
     String[] labels = { "Roll", "Pitch", "Yaw", "Vertical" };
-    positionsDataVisualizer = new RealTimeDataApp("Drone State Visualization", labels);
+    positionsDataVisualizer = new RealTimeDataApp("Drone State Visualization - Errors", labels);
 
     rollPID = new PID(K_ROLL_P, K_ROLL_I, K_ROLL_D, 100.0);
     pitchPID = new PID(K_PITCH_P, K_PITCH_I, K_PITCH_D, 0.0);
@@ -128,26 +132,34 @@ public class DroneController extends Robot {
     double dt = 0.01;
     double deltaX = TARGET_X - xPos;
     double deltaY = TARGET_Y - yPos;
-    double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    double targetAngle = Math.atan2(deltaY, deltaX);
-    double currentYaw = yaw;
-    double yawError = targetAngle - currentYaw;
+    // double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    double targetRoll = Math.atan2(deltaY, deltaX);
+    double targetPitch = 0; // Assuming level flight, so no pitch adjustment.
+    double rollError = targetRoll - roll;
+    double pitchError = targetPitch - pitch;
+
+    double targetAngle = TARGET_YAW;
+    double currentYaw = yaw + yawDisturbance;
+    double yawError = Math.atan2(Math.sin(targetAngle - currentYaw), Math.cos(targetAngle - currentYaw));
     if (yawError > Math.PI) {
         yawError -= 2 * Math.PI;
     } else if (yawError < -Math.PI) {
         yawError += 2 * Math.PI;
     }
-    double rollError = distance;
-    double pitchError = distance;
+    System.out.println("Target Angle: " + Math.toDegrees(targetAngle));
+    System.out.println("Current Yaw: " + Math.toDegrees(currentYaw));
+    System.out.println("Yaw Error: " + Math.toDegrees(yawError));
 
     final double rollInput = rollPID.update(rollError, dt);
     final double pitchInput = pitchPID.update(pitchError, dt);
     final double yawInput = yawPID.update(yawError, dt);
     final double clampedDiffAltitude = clamp(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0, 1.0);
     final double verticalInput = K_VERTICAL_P * Math.pow(clampedDiffAltitude, 3);
-    double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
 
-    positionsDataVisualizer.visualize(allInputs);
+    double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
+    double[] errors = { rollError, pitchError, yawError, clampedDiffAltitude };
+
+    positionsDataVisualizer.visualize(errors);
 
     return allInputs;
   }

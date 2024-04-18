@@ -12,8 +12,8 @@ public class RealTimeDataApp {
   private List<List<Double>> yDataList = new ArrayList<>();
   private int maxDataPoints = 100; // Maximum number of data points to display
   private int currentDataIndex = 0;
-  private double Y_MIN = -10;
-  private double Y_MAX = 10;
+  private double Y_MIN = -6;
+  private double Y_MAX = 6;
   private double currentX = 0.0;
   private JPanel chartPanel;
   private JLabel statusLabel;
