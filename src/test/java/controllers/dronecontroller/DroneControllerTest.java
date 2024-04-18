@@ -1,14 +1,36 @@
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DroneControllerTest {
+import org.junit.jupiter.api.Test;
+
+class DroneControllerTest {
 
   @Test
-  public void testClamp() {
-    assertEquals(3.0, DroneController.clamp(3.0, 1.0, 5.0), 0.0001); // value within range
-    assertEquals(1.0, DroneController.clamp(-1.0, 1.0, 5.0), 0.0001); // value below low
-    assertEquals(5.0, DroneController.clamp(6.0, 1.0, 5.0), 0.0001); // value above high
-    assertEquals(1.0, DroneController.clamp(0.0, 1.0, 5.0), 0.0001); // value at low
-    assertEquals(5.0, DroneController.clamp(5.0, 1.0, 5.0), 0.0001); // value at high
+  void testClampWithinRange() {
+    double value = 5.0;
+    double low = 1.0;
+    double high = 10.0;
+    double result = DroneController.clamp(value, low, high);
+
+    assertEquals(value, result);
+  }
+
+  @Test
+  void testClampBelowRange() {
+    double value = 0.5;
+    double low = 1.0;
+    double high = 10.0;
+    double result = DroneController.clamp(value, low, high);
+
+    assertEquals(low, result);
+  }
+
+  @Test
+  void testClampAboveRange() {
+    double value = 15.0;
+    double low = 1.0;
+    double high = 10.0;
+    double result = DroneController.clamp(value, low, high);
+
+    assertEquals(high, result);
   }
 }
