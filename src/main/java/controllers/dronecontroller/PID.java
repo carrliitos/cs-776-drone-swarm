@@ -1,76 +1,98 @@
 public class PID {
-  private double kp;  // Proportional gain
-  private double ki;  // Integral gain
-  private double kd;  // Derivative gain
-  private double setpoint;  // Desired setpoint
-  private double integral;  // Integral term
-  private double prevInput;  // Previous input value
-  private double prevTime;  // Previous time value
-  private boolean autoMode;  // Automatic mode flag
-  private double lastOutput;  // Last computed output
+  private double setPoint;
+  private double kP, kI, kD;
+  private double minLimit = Double.NaN;
+  private double maxLimit = Double.NaN;
+  private double previousTime = Double.NaN;
+  private double lastError = 0;
+  private double integralError = 0;
 
-  public PID(double kp, double ki, double kd, double setpoint) {
-    this.kp = kp;
-    this.ki = ki;
-    this.kd = kd;
-    this.setpoint = setpoint;
-    this.integral = 0;
-    this.prevInput = 0;
-    this.prevTime = 0;
-    this.autoMode = true;
-    this.lastOutput = 0;
+  public PID(final double kP, final double kI, final double kD, final double setPoint) {
+    this.kP = kP;
+    this.kI = kI;
+    this.kD = kD;
+    this.setSetpoint(setPoint);
   }
 
-  public double update(double input, double dt) {
-    if (!autoMode) {
-      return lastOutput;
+  public double getOutput(final double currentTime, final double currentValue) {
+    final double error = setPoint - currentValue;
+    final double dt = (previousTime != Double.NaN) ? (double)(currentTime - previousTime) : 0;
+    
+    // Compute Integral & Derivative error
+    final double derivativeError = (dt != 0) ? ((error - lastError) / dt) : 0;
+    integralError += error * dt;
+    
+    // Save history
+    previousTime = currentTime;
+    lastError = error;
+    
+    return checkLimits((kP * error) + (kI * integralError) + (kD * derivativeError));
+  }
+
+  public void reset() {
+    previousTime = 0;
+    lastError = 0;
+    integralError = 0;
+  }
+
+  private double checkLimits(final double output){
+    if (!Double.isNaN(minLimit) && output < minLimit) {
+      return minLimit;
+    } else if (!Double.isNaN(maxLimit) && output > maxLimit) {
+      return maxLimit;
+    } else {
+      return output;
     }
+  }
 
-    double error = setpoint - input;
-    double dInput = input - prevInput;
-    double now = System.currentTimeMillis() / 1000.0;  // Current time in seconds
-    double deltaTime = now - prevTime;
-
-    if (dt == 0.0) {
-      dt = deltaTime != 0 ? deltaTime : 1e-16;
-    } else if (dt <= 0) {
-      throw new IllegalArgumentException("dt has negative value " + dt + ", must be positive");
+  public void setOuputLimits(final double minLimit, final double maxLimit) {
+    if (minLimit < maxLimit) {
+      this.minLimit = minLimit;
+      this.maxLimit = maxLimit;
+    } else {
+      this.minLimit = maxLimit;
+      this.maxLimit = minLimit;
     }
-
-    // Compute proportional term
-    double proportional = kp * error;
-
-    // Compute integral term
-    integral += ki * error * dt;
-    integral = clamp(integral, -1, 1);  // Limit integral term to prevent windup
-
-    // Compute derivative term
-    double derivative = 0;
-    if (dt > 0) {
-      derivative = -kd * dInput / dt;
-    }
-
-    // Compute output
-    double output = proportional + integral + derivative;
-    output = clamp(output, -1, 1);  // Limit output to output limits
-
-    // Update state variables
-    lastOutput = output;
-    prevInput = input;
-    prevTime = now;
-
-    return output;
+  }
+  
+  public void removeOuputLimits() {
+    this.minLimit = Double.NaN;
+    this.maxLimit = Double.NaN;
+  }
+  
+  public double getkP() {
+    return kP;
   }
 
-  private double clamp(double value, double low, double high) {
-    return value < low ? low : (value > high ? high : value);
+  public void setkP(double kP) {
+    this.kP = kP;
+    reset();
   }
 
-  public void setAutoMode(boolean autoMode) {
-    this.autoMode = autoMode;
+  public double getkI() {
+    return kI;
   }
 
-  public void setPoint(double setpoint) {
-    this.setpoint = setpoint;
+  public void setkI(double kI) {
+    this.kI = kI;
+    reset();
+  }
+
+  public double getkD() {
+    return kD;
+  }
+
+  public void setkD(double kD) {
+    this.kD = kD;
+    reset();
+  }
+
+  public double getSetPoint() {
+    return setPoint;
+  }
+  
+  public void setSetpoint(final double setPoint) {
+    reset();
+    this.setPoint = setPoint;
   }
 }
