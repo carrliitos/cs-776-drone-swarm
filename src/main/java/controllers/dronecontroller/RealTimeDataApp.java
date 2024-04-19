@@ -94,14 +94,17 @@ public class RealTimeDataApp {
       }
       g2d.setColor(Color.GRAY);
       int y0 = HEIGHT - (int) ((0 - yMin) * yScale);
-      int yPosLine = HEIGHT - (int) ((5 - yMin) * yScale);
-      int yNegLine = HEIGHT - (int) ((-5 - yMin) * yScale);
       g2d.drawLine(0, y0, WIDTH, y0);
       g2d.drawString("y=0", 5, y0 - 5);
+      int y1 = HEIGHT - (int) ((1 - yMin) * yScale);
+      g2d.drawLine(0, y1, WIDTH, y1);
+      g2d.drawString("y=1 (Reference Line)", 5, y1 - 5);
+      int yPosLine = HEIGHT - (int) ((5 - yMin) * yScale);
       g2d.drawLine(0, yPosLine, WIDTH, yPosLine);
       g2d.drawString("y=5", 5, yPosLine - 5);
+      int yNegLine = HEIGHT - (int) ((-5 - yMin) * yScale);
       g2d.drawLine(0, yNegLine, WIDTH, yNegLine);
-      g2d.drawString("y=5", 5, yNegLine - 5);
+      g2d.drawString("y=-5", 5, yNegLine - 5);
       g2d.dispose();
     } else {
       Graphics2D g2d = (Graphics2D) g.create();
