@@ -9,6 +9,7 @@ import com.cyberbotics.webots.controller.Compass;
 import java.io.IOException;
 
 public class DroneController extends Robot {
+  // private int TIME_STEP = (int) Math.round(getBasicTimeStep());
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   private static final double TARGET_ALTITUDE = 1.0;
   private static final double TARGET_X = 0.0;
@@ -32,10 +33,10 @@ public class DroneController extends Robot {
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
   private static final double K_VERTICAL_OFFSET = 0.6; // Vertical offset where the robot actually targets to stabilize itself.
 
-  private static final double K_ROLL_P = 0.0;
-  private static final double K_PITCH_P = 0;
-  private static final double K_YAW_P = 0;
-  private static final double K_THROTTLE_P = 0.0;
+  private static final double K_ROLL_P = -1.0;
+  private static final double K_PITCH_P = -1.0;
+  private static final double K_YAW_P = -1.0;
+  private static final double K_THROTTLE_P = 0.1;
 
   private static final double K_PITCH_I = 0.0;
   private static final double K_ROLL_I = 0.0;
@@ -44,7 +45,7 @@ public class DroneController extends Robot {
 
   private static final double K_ROLL_D = 0.0;
   private static final double K_PITCH_D = 0.0;
-  private static final double K_YAW_D = 0.0;
+  private static final double K_YAW_D = -2.0;
   private static final double K_THROTTLE_D = 0.0;
   
   public DroneController() {
@@ -67,17 +68,15 @@ public class DroneController extends Robot {
     frontLeftPropeller = getMotor("front left propeller");
     rearRightPropeller = getMotor("rear right propeller");
     rearLeftPropeller = getMotor("rear left propeller");
-    motors = new Motor[] {
-      frontRightPropeller,
-      frontLeftPropeller,
-      rearRightPropeller,
-      rearLeftPropeller
-    };
-    
-    for (Motor motor : motors) {
-      motor.setPosition(Double.POSITIVE_INFINITY);
-      motor.setVelocity(1); // 10% of velocity to start
-    }
+    // initialize motors
+    frontLeftPropeller.setVelocity(1.0);
+    frontLeftPropeller.setPosition(Double.POSITIVE_INFINITY);
+    frontRightPropeller.setVelocity(1.0);
+    frontRightPropeller.setPosition(Double.POSITIVE_INFINITY);
+    rearLeftPropeller.setVelocity(1.0);
+    rearLeftPropeller.setPosition(Double.POSITIVE_INFINITY);
+    rearRightPropeller.setVelocity(1.0);
+    rearRightPropeller.setPosition(Double.POSITIVE_INFINITY);
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
@@ -94,7 +93,7 @@ public class DroneController extends Robot {
     // Wait one second
     double previousTime = 0.0;
     while (step(TIME_STEP) != -1) {
-      if (getTime() - previousTime > 1.0) { break; }
+      if (getTime() - previousTime > 5.0) { break; }
     }
   }
   
