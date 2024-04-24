@@ -7,7 +7,7 @@ import com.cyberbotics.webots.controller.Gyro;
 
 import java.io.IOException;
 
-public class DroneController extends Robot {
+public class Drone3Controller extends Robot {
   private static final int TIME_STEP = 64; // Simulation time step in milliseconds
   private static final double TARGET_ALTITUDE = 1.0;
   private static final double TARGET_X = 0.0;
@@ -28,7 +28,7 @@ public class DroneController extends Robot {
   private static final double K_ROLL_P = 22.0; // P constant of the roll PID.
   private static final double K_PITCH_P = 17.0; // P constant of the pitch PID.
   
-  public DroneController() {
+  public Drone3Controller() {
     super();
     initializeDevices();
   }
@@ -184,7 +184,7 @@ public class DroneController extends Robot {
   }
   
   public static void main(String[] args) {
-    DroneController droneController = new DroneController();
+    Drone3Controller droneController = new Drone3Controller();
     droneController.run();
   }
 }
