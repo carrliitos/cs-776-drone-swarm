@@ -19,7 +19,6 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
-  private RealTimeDataApp positionsDataVisualizer;
     
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
@@ -65,8 +64,6 @@ public class DroneController extends Robot {
     
     cameraRollMotor = getMotor("camera roll");
     cameraPitchMotor = getMotor("camera pitch");
-    String[] labels = { "Roll", "Pitch", "Yaw", "Vertical" };
-    positionsDataVisualizer = new RealTimeDataApp("Drone State Visualization", labels);
   }
   
   private void displayWelcomeMessage() {
@@ -132,7 +129,6 @@ public class DroneController extends Robot {
     rollInput += velocityX;
     
     double[] allInputs = { rollInput, pitchInput, yawInput, verticalInput };
-    positionsDataVisualizer.visualize(allInputs);
 
     return allInputs;
   }
