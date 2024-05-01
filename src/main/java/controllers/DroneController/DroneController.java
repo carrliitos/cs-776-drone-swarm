@@ -142,6 +142,9 @@ public class DroneController extends Robot {
     double y_iterator = 0.05;
     int y_it_count = 0;
     
+    double input_alt = 0;
+    int alt_it_count = 0;
+    
     //double posX = 0;
     //double altitude = 0;
     //double posZ = 0;
@@ -177,20 +180,20 @@ public class DroneController extends Robot {
       switch (key) {
         case Keyboard.UP:
           //pitch_disturbance = -2.0;
-          target_x -= x_iterator;
-          //System.out.println(target_x);
+          target_x += x_iterator;
+          System.out.println(target_x);
           break;
         case Keyboard.DOWN:
           //pitch_disturbance = 2.0;
-          target_x += x_iterator;
+          target_x -= x_iterator;
           break;
         case Keyboard.RIGHT:
           //roll_disturbance = -1.0;
-          target_y -= y_iterator;
+          target_y += y_iterator;
           break;
         case Keyboard.LEFT:
           //roll_disturbance = 1.0;
-          target_y += y_iterator;
+          target_y -= y_iterator;
           break;
         case (Keyboard.SHIFT + Keyboard.RIGHT):
           yaw_disturbance = -1.3;
@@ -204,18 +207,63 @@ public class DroneController extends Robot {
           break;
         case (Keyboard.SHIFT + Keyboard.DOWN):
           target_altitude -= 0.05;
-          //System.out.printf("target altitude: %f [m]\n", target_altitude);
+          System.out.printf("target altitude: %f [m]\n", target_altitude);
           break;
           
          case (Keyboard.SHIFT+'T'):
            //target_x = 5;
            input_x = 5;
-           //x_it_count = (int)((input_x - target_x)/x_iterator);
+           x_it_count = (int)((input_x - target_x)/x_iterator);
            
            input_y = 5;
-           y_it_count = (int)((input_x - target_x)/y_iterator);
+           y_it_count = (int)((input_y + target_y)/y_iterator);
            
-           System.out.println("Test");
+           input_alt = 5;
+           alt_it_count = (int)((input_alt - target_altitude)/0.05);
+           
+           System.out.println("Test1");
+           break;
+           
+         case (Keyboard.SHIFT+'Y'):
+           //target_x = 5;
+           input_x = -7;
+           x_it_count = (int)((input_x - target_x)/x_iterator);
+           
+           input_y = -7;
+           y_it_count = (int)((input_y + target_y)/y_iterator);
+           
+           input_alt = 15;
+           alt_it_count = (int)((input_alt - target_altitude)/0.05);
+           
+           System.out.println("Test2");
+           break;
+           
+          case (Keyboard.SHIFT+'U'):
+           //target_x = 5;
+           input_x = 32;
+           x_it_count = (int)((input_x - target_x)/x_iterator);
+           
+           input_y = -40;
+           y_it_count = (int)((input_y + target_y)/y_iterator);
+           
+           input_alt = 50;
+           alt_it_count = (int)((input_alt - target_altitude)/0.05);
+           
+           System.out.println("Test3");
+           break;
+           
+          case (Keyboard.SHIFT+'B'):
+           //target_x = 5;
+           input_x = 0;
+           x_it_count = (int)((input_x - target_x)/x_iterator);
+           
+           input_y = 0;
+           y_it_count = (int)((input_y + target_y)/y_iterator);
+           
+           input_alt = 1;
+           alt_it_count = (int)((input_alt - target_altitude)/0.05);
+           
+           System.out.println("Back To Base");
            break;
       }
       key = keyboard.getKey();
@@ -248,15 +296,33 @@ public class DroneController extends Robot {
         target_y -= y_iterator;
         y_it_count--;
       } 
-      System.out.println(posY);
+      
+      if (alt_it_count < 0){
+         target_altitude -= 0.05;
+         alt_it_count++;
+      } else if (alt_it_count > 0){
+        target_altitude += 0.05;
+        alt_it_count--;
+      } 
+      
+      if(x_it_count == 0 && y_it_count == 0 && alt_it_count == 0){
+        //System.out.println("Drone made it to target point:");
+        System.out.printf(" TARGET -- X: %f | Y: %f | Altitude: %f \n", target_x, target_y, target_altitude);
+        System.out.printf("CURRENT -- X: %f | Y: %f | Altitude: %f \n", posX, posY, altitude);
+      }
+      
+      
+      
+      //System.out.println("X: "+posX+" | Y: "+posY+" | Altitude: "+altitude);
+      //System.out.printf("X: %f | Y: %f | Altitude: %f \n", posX, posY, altitude);
 
       // Compute the roll, pitch, yaw and vertical inputs.
       
       error_y = CLAMP(target_y + posY, -1, 1);
       d_error_y = error_y - last_error_y;
       last_error_y = error_y;
-      double roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance;
-      roll_input = roll_input + (kp_y * error_y) + (kd_y * d_error_y);
+      double roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + 2*roll_acceleration + roll_disturbance;
+      roll_input = roll_input + ( (kp_y * error_y) + (kd_y * d_error_y) );
       
       
       
