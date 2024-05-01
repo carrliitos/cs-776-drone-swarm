@@ -5,6 +5,8 @@ import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
 import com.cyberbotics.webots.controller.Keyboard;
+import com.cyberbotics.webots.controller.Mouse;
+import com.cyberbotics.webots.controller.MouseState;
 import java.lang.Math;
 import java.io.IOException;
 
@@ -20,6 +22,7 @@ public class DroneController extends Robot {
    GPS gps;
    Gyro gyro;
    Keyboard keyboard;
+   Mouse mouse;
     
   // Constants, empirically found.
   final double k_vertical_thrust = 68.5;  // with this thrust, the drone lifts.
@@ -86,6 +89,10 @@ public class DroneController extends Robot {
     gyro.enable(TIME_STEP);
     keyboard = new Keyboard();
     keyboard.enable(1);
+    mouse = new Mouse();
+    mouse.enable(TIME_STEP);
+    mouse.enable3dPosition();
+    
     frontLeftLED = new LED("front left led");
     frontRightLED = new LED("front right led");
     frontRightPropeller = getMotor("front right propeller");
@@ -146,6 +153,24 @@ public class DroneController extends Robot {
       final double roll_acceleration = gyro.getValues()[0];
       final double pitch_acceleration = gyro.getValues()[1];
       
+      
+      MouseState mouseState = mouse.getState();
+      double mouseX = mouseState.getX();
+      double mouseY = mouseState.getY();
+      double mouseZ = mouseState.getZ();
+      if (mouseState.getRight() && mouseState.getLeft()){
+        System.out.printf("MouseX = %f.2 | MouseY = %f.2, | MouseZ = %f.2 | Clicked = %s \n", mouseX, mouseY, mouseZ, mouseState.getRight());
+        
+        input_x = mouseX;
+        x_it_count = (int)((input_x - target_x)/x_iterator);           
+        
+        input_y = mouseY;
+        y_it_count = (int)((input_y + target_y)/y_iterator);
+
+        //input_alt = mouseZ;
+        //alt_it_count = (int)((input_alt - target_altitude)/0.05);
+
+      }
       
 
       //Blink the front LEDs alternatively with a 1 second rate.
