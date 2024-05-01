@@ -40,12 +40,6 @@ public class DroneController extends Robot {
   double kp_y = 5;
   double kd_y = 5;
   
-  double kp_altitude = 3;
-  double kd_altitude = 10;
-  
-  double kp_yawn = 1;
-  double kd_yawn = 1;
-  
   
 
 
@@ -125,14 +119,6 @@ public class DroneController extends Robot {
     double last_error_y = 0;
     double d_error_y = 0;
     
-    double error_altitiude = 0;
-    double last_error_altitude = 0;
-    double d_error_altitude = 0;
-    
-    double error_yawn =0; 
-    double last_error_yawn = 0;
-    double d_error_yawn = 0;
-    
     
     double input_x = 0;
     double x_iterator = 0.05;
@@ -144,12 +130,6 @@ public class DroneController extends Robot {
     
     double input_alt = 0;
     int alt_it_count = 0;
-    
-    //double posX = 0;
-    //double altitude = 0;
-    //double posZ = 0;
-    
-    
     
     
     while (step(TIME_STEP) != -1) {
@@ -211,7 +191,6 @@ public class DroneController extends Robot {
           break;
           
          case (Keyboard.SHIFT+'T'):
-           //target_x = 5;
            input_x = 5;
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
@@ -225,7 +204,6 @@ public class DroneController extends Robot {
            break;
            
          case (Keyboard.SHIFT+'Y'):
-           //target_x = 5;
            input_x = -7;
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
@@ -239,7 +217,6 @@ public class DroneController extends Robot {
            break;
            
           case (Keyboard.SHIFT+'U'):
-           //target_x = 5;
            input_x = 32;
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
@@ -249,11 +226,10 @@ public class DroneController extends Robot {
            input_alt = 50;
            alt_it_count = (int)((input_alt - target_altitude)/0.05);
            
-           System.out.println("Test3");
+           System.out.println("Test Extreme");
            break;
            
           case (Keyboard.SHIFT+'B'):
-           //target_x = 5;
            input_x = 0;
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
@@ -322,7 +298,7 @@ public class DroneController extends Robot {
       d_error_y = error_y - last_error_y;
       last_error_y = error_y;
       double roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + 2*roll_acceleration + roll_disturbance;
-      roll_input = roll_input + ( (kp_y * error_y) + (kd_y * d_error_y) );
+      roll_input = roll_input +(kp_y * error_y) + (kd_y * d_error_y);
       
       
       
