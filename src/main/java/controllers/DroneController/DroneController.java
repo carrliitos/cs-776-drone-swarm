@@ -37,8 +37,8 @@ public class DroneController extends Robot {
   double kp_x = 5;
   double kd_x = 5;
   
-  double kp_z = 10;
-  double kd_z = 10;
+  double kp_y = 5;
+  double kd_y = 5;
   
   double kp_altitude = 3;
   double kd_altitude = 10;
@@ -121,9 +121,9 @@ public class DroneController extends Robot {
     double last_error_x = 0;
     double d_error_x = 0;
     
-    double error_z = 0;
-    double last_error_z = 0;
-    double d_error_z = 0;
+    double error_y = 0;
+    double last_error_y = 0;
+    double d_error_y = 0;
     
     double error_altitiude = 0;
     double last_error_altitude = 0;
@@ -135,8 +135,12 @@ public class DroneController extends Robot {
     
     
     double input_x = 0;
+    double x_iterator = 0.05;
     int x_it_count = 0;
+    
     double input_y = 0;
+    double y_iterator = 0.05;
+    int y_it_count = 0;
     
     //double posX = 0;
     //double altitude = 0;
@@ -173,18 +177,20 @@ public class DroneController extends Robot {
       switch (key) {
         case Keyboard.UP:
           //pitch_disturbance = -2.0;
-          target_x -= 0.05;
+          target_x -= x_iterator;
           //System.out.println(target_x);
           break;
         case Keyboard.DOWN:
           //pitch_disturbance = 2.0;
-          target_x += 0.05;
+          target_x += x_iterator;
           break;
         case Keyboard.RIGHT:
-          roll_disturbance = -1.0;
+          //roll_disturbance = -1.0;
+          target_y -= y_iterator;
           break;
         case Keyboard.LEFT:
-          roll_disturbance = 1.0;
+          //roll_disturbance = 1.0;
+          target_y += y_iterator;
           break;
         case (Keyboard.SHIFT + Keyboard.RIGHT):
           yaw_disturbance = -1.3;
@@ -204,19 +210,19 @@ public class DroneController extends Robot {
          case (Keyboard.SHIFT+'T'):
            //target_x = 5;
            input_x = 5;
-           x_it_count = (int)((input_x - target_x)/0.05);
+           //x_it_count = (int)((input_x - target_x)/x_iterator);
+           
+           input_y = 5;
+           y_it_count = (int)((input_x - target_x)/y_iterator);
            
            System.out.println("Test");
            break;
       }
       key = keyboard.getKey();
     }
-
-      // Compute the roll, pitch, yaw and vertical inputs.
-      final double roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance;
-      
-      
-      /*
+    
+    
+    /*
       if (input_x < target_x){
          target_x -= 0.05;
       } else if (input_x > target_x){
@@ -227,17 +233,36 @@ public class DroneController extends Robot {
       
       */
       if (x_it_count < 0){
-         target_x -= 0.05;
+         target_x -= x_iterator;
          x_it_count++;
       } else if (x_it_count > 0){
-        target_x += 0.05;
+        target_x += x_iterator;
         x_it_count--;
       } 
-      System.out.println(posX);
+      //System.out.println(posX);
+      
+      if (y_it_count < 0){
+         target_y += y_iterator;
+         y_it_count++;
+      } else if (y_it_count > 0){
+        target_y -= y_iterator;
+        y_it_count--;
+      } 
+      System.out.println(posY);
+
+      // Compute the roll, pitch, yaw and vertical inputs.
+      
+      error_y = CLAMP(target_y + posY, -1, 1);
+      d_error_y = error_y - last_error_y;
+      last_error_y = error_y;
+      double roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance;
+      roll_input = roll_input + (kp_y * error_y) + (kd_y * d_error_y);
+      
+      
+      
       
       
       error_x = CLAMP(target_x - posX, -1, 1);
-      //d_error_x = CLAMP(error_x - last_error_x, -1, 1);
       d_error_x = error_x - last_error_x;
       last_error_x = error_x;
       double pitch_input = k_pitch_p * CLAMP(pitch, -1.0, 1.0) + pitch_acceleration + pitch_disturbance;
