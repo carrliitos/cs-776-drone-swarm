@@ -108,10 +108,52 @@ public class DroneController extends Robot {
     cameraRollMotor.setPosition(-0.115 * rollVelocity);
     cameraPitchMotor.setPosition(-0.1 * pitchVelocity);
   }
+  
+  public void keyboardControls(double[] disturbances) {
+    int key = keyboard.getKey();
+    while (key > 0) {
+      switch (key) {
+        case Keyboard.UP:
+          disturbances[0] = -2.0; // pitchDisturbance
+          break;
+        case Keyboard.DOWN:
+          disturbances[0] = 2.0; // pitchDisturbance
+          break;
+        case Keyboard.RIGHT:
+          disturbances[1] = -1.3; // yawDisturbance
+          break;
+        case Keyboard.LEFT:
+          disturbances[1] = 1.3; // yawDisturbance
+          break;
+        case (Keyboard.SHIFT + Keyboard.RIGHT):
+          disturbances[2] = -1.0; // rollDisturbance
+          break;
+        case (Keyboard.SHIFT + Keyboard.LEFT):
+          disturbances[2] = 1.0; // rollDisturbance
+          break;
+        case (Keyboard.SHIFT + Keyboard.UP):
+          disturbances[3] += 0.05; // targetAltitude
+          System.out.printf("target altitude: %.2f [m]%n", disturbances[3]);
+          break;
+        case (Keyboard.SHIFT + Keyboard.DOWN):
+          disturbances[3] -= 0.05; // targetAltitude
+          System.out.printf("target altitude: %.2f [m]%n", disturbances[3]);
+          break;
+      }
+      key = keyboard.getKey();
+    }
+  }
 
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance,
                                  double xPos, double yPos, double targetAltitude) {
+    double[] disturbances = {pitchDisturbance, yawDisturbance, rollDisturbance, targetAltitude};
+    keyboardControls(disturbances);
+    
+    pitchDisturbance = disturbances[0];
+    yawDisturbance = disturbances[1];
+    rollDisturbance = disturbances[2];
+    targetAltitude = disturbances[3];
 
     double pitchInput = K_PITCH_P * clamp(pitch, -1.0, 1.0) + pitchVelocity + pitchDisturbance;
     double rollInput = K_ROLL_P * clamp(roll, -1.0, 1.0) + rollVelocity + rollDisturbance;
@@ -173,40 +215,6 @@ public class DroneController extends Robot {
 
       // Stabilize the Camera by actuating the camera motors according to the gyro feedback.
       stabilizeCamera(rollVelocity, pitchVelocity);
-      
-      // Keyboard outputs for drone controls
-      int key = keyboard.getKey();
-      while (key > 0) {
-        switch (key) {
-          case Keyboard.UP:
-            pitchDisturbance = -2.0;
-            break;
-          case Keyboard.DOWN:
-            pitchDisturbance = 2.0;
-            break;
-          case Keyboard.RIGHT:
-            yawDisturbance = -1.3;
-            break;
-          case Keyboard.LEFT:
-            yawDisturbance = 1.3;
-            break;
-          case (Keyboard.SHIFT + Keyboard.RIGHT):
-            rollDisturbance = -1.0;
-            break;
-          case (Keyboard.SHIFT + Keyboard.LEFT):
-            rollDisturbance = 1.0;
-            break;
-          case (Keyboard.SHIFT + Keyboard.UP):
-            targetAltitude += 0.05;
-            System.out.printf("target altitude: %.2f [m]%n", targetAltitude);
-            break;
-          case (Keyboard.SHIFT + Keyboard.DOWN):
-            targetAltitude -= 0.05;
-            System.out.printf("target altitude: %.2f [m]%n", targetAltitude);
-            break;
-        }
-        key = keyboard.getKey();
-      }
 
       // Compute the roll, pitch, yaw and vertical inputs.
       double[] rpyvInputs = computeInputs(roll, altitude, rollVelocity, rollDisturbance, 
