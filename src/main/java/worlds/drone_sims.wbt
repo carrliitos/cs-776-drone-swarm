@@ -18,8 +18,8 @@ WorldInfo {
   info [
     "Drone functionalities for our CS776 project."
   ]
-  title "DJI Mavic 2 PRO"
-  basicTimeStep 8
+  title "CS776 Drone Swarm"
+  basicTimeStep 32
   defaultDamping Damping {
     linear 0.5
     angular 0.5
@@ -27,13 +27,17 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.17487929730817975 0.7237029248614424 -0.6675861801445493 0.7758003434234048
+<<<<<<< HEAD:src/main/resources/worlds/drone_sims.wbt
   position -5.334274327938215 3.4565109583567244 3.999031480534267
+=======
+  position -4.31458133573529 2.610387891886271 3.3433935895724036
+>>>>>>> development:src/main/java/worlds/drone_sims.wbt
   near 0.2
   follow "droneCarlitos"
   followSmoothness 0.2
 }
 TexturedBackground {
-  luminosity 3
+  luminosity 0
 }
 TexturedBackgroundLight {
   texture "dawn_cloudy_empty"
@@ -42,6 +46,7 @@ Floor {
   size 400 400
   tileSize 6 6
   appearance SandyGround {
+    colorOverride 0.5 0.5 0.5
   }
 }
 Road {
@@ -103,6 +108,18 @@ SquareManhole {
   translation 1 0.5 -0.03
   name "manhole-rodrigue"
 }
+SquareManhole {
+  translation 1 0 -0.03
+  name "manhole(4)"
+}
+SquareManhole {
+  translation 0 -1 -0.03
+  name "manhole(3)"
+}
+SquareManhole {
+  translation 0 1 -0.03
+  name "manhole(2)"
+}
 TeslaModel3Simple {
   translation -41.5139 4.34169 0.31
   rotation 0 0 1 -0.2618053071795865
@@ -161,11 +178,15 @@ Forest {
   maxRadius 6
   minRadius 3
 }
-Mavic2Pro {
+DEF Drone1 Mavic2Pro {
   translation 0 0 0.1
   rotation 0 0 1 3.141590777218456
+<<<<<<< HEAD:src/main/resources/worlds/drone_sims.wbt
   name "droneCarlitos"
   controller "<extern>"
+=======
+  controller "DroneController"
+>>>>>>> development:src/main/java/worlds/drone_sims.wbt
   cameraSlot [
     Camera {
       width 400
@@ -174,11 +195,18 @@ Mavic2Pro {
     }
   ]
 }
+<<<<<<< HEAD:src/main/resources/worlds/drone_sims.wbt
 Mavic2Pro {
   translation 0 -1 0.1
   rotation 0 0 1 3.141590777218456
   name "droneTalba"
   controller "<extern>"
+=======
+DEF Drone4 Mavic2Pro {
+  translation 1 0 0.1
+  rotation 0 0 1 3.141590777218456
+  name "Mavic 2 PRO(4)"
+  controller "Drone4Controller"
   cameraSlot [
     Camera {
       width 400
@@ -187,6 +215,21 @@ Mavic2Pro {
     }
   ]
 }
+DEF Drone3 Mavic2Pro {
+  translation 0 -1 0.1
+  rotation 0 0 1 3.141590777218456
+  name "Mavic 2 PRO(3)"
+  controller "Drone3Controller"
+>>>>>>> development:src/main/java/worlds/drone_sims.wbt
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+<<<<<<< HEAD:src/main/resources/worlds/drone_sims.wbt
 Mavic2Pro {
   translation 1 -0.5 0.1
   rotation 0 0 1 3.141590777218456
@@ -218,6 +261,13 @@ Mavic2Pro {
   rotation 0 0 1 3.141590777218456
   name "droneRodrigue"
   controller "<extern>"
+=======
+DEF Drone2 Mavic2Pro {
+  translation 0 1 0.1
+  rotation 0 0 1 3.141590777218456
+  name "Mavic 2 PRO(1)"
+  controller "Drone2Controller"
+>>>>>>> development:src/main/java/worlds/drone_sims.wbt
   cameraSlot [
     Camera {
       width 400
