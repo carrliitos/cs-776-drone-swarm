@@ -98,28 +98,28 @@ public class SupervisorController extends Supervisor {
   
   private void formLShape() {
     double[][] targetPositions = {
-        { base_values[0], base_values[1], 1 },
-        { base_values[0] + 1, base_values[1], 2 },
-        { base_values[0] + 2, base_values[1], 3 },
-        { base_values[0], base_values[1] - 1, 4 },
-        { base_values[0], base_values[1] - 2, 5 },
-        { base_values[0], base_values[1] - 3, 6 }
+        { 0.0, 0.0, 1.0 },
+        { 1.0, 0.0, 1.2 },
+        { 2.0, 0.0, 1.4 },
+        { 3.0, 0.0, 1.5 },
+        { 3.0, 1.0, 1.6 },
+        { 3.0, 2.0, 1.8 }
     };
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
   }
   
   private void formBoxShape() {
-      double[][] targetPositions = {
-          { 0.0, 0.0, 1.0 },
-          { 1.0, 0.0, 1.0 },
-          { 1.0, 1.0, 1.0 },
-          { 0.0, 1.0, 1.0 },
-          { 0.0, 0.0, 2.0 },
-          { 1.0, 0.0, 2.0 }
-      };
-      currentFormation = targetPositions;
-      moveDronesToTarget(targetPositions);
+    double[][] targetPositions = {
+        { 0.0, 0.0, 1.0 },
+        { 1.0, 0.0, 1.0 },
+        { 1.0, 1.0, 1.0 },
+        { 0.0, 1.0, 1.0 },
+        { 0.0, 0.0, 2.0 },
+        { 1.0, 0.0, 2.0 }
+    };
+    currentFormation = targetPositions;
+    moveDronesToTarget(targetPositions);
   }
   
 
