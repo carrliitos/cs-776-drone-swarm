@@ -42,67 +42,69 @@ public class SupervisorController extends Supervisor {
   
   public void run() {
     currentFormation = baseFormation;
+    double[][] currentPosition = new double[6][3];
     while (step(TIME_STEP) != -1) {
       int key = keyboard.getKey();
-      while (key > 0) {
+      if (key > 0) {
         switch (key) {
-          case (Keyboard.SHIFT + 'T'):
+          case Keyboard.SHIFT + 'T':
             System.out.println("T Formation");
-            formTShape();
-            break;
-          case (Keyboard.SHIFT + 'L'):
-            System.out.println("L Formation");
-            formLShape();
-            break;
-          case (Keyboard.SHIFT + 'B'):
-            System.out.println("Box Formation");
-            formBoxShape();
+            for (int i = 0; i < 6; i++) {
+              currentPosition[i] = transFields[i].getSFVec3f();
+              System.out.println("Drone " + (i + 1) + " current position: (" + currentPosition[i][0] + ", " + currentPosition[i][1] + ", " + currentPosition[i][2] + ")");
+              formTShape(currentPosition);
+            }
             break;
         }
-        key = keyboard.getKey();
-      }
-      if (keyboard.getKey() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
-        currentFormation = baseFormation;
-        moveDronesToTarget(baseFormation);
       }
     }
   }
 
-  private void moveDronesToTarget(double[][] targetPositions) {
+  private void moveDronesToTarget(double[][] targetPositions, double[][] currentPosition) {
+    double distanceThreshold = 0.01;
     for (int i = 0; i < 6; i++) {
-      double[] currentPosition = transFields[i].getSFVec3f();
+      double[] currentPos = currentPosition[i];
+      double[] targetPos = targetPositions[i];
 
-      int startX = (int) Math.round(currentPosition[0]);
-      int startY = (int) Math.round(currentPosition[1]);
-      int startZ = (int) Math.round(currentPosition[2]);
+      double distance = Math.sqrt(Math.pow(targetPos[0] - currentPos[0], 2)
+          + Math.pow(targetPos[1] - currentPos[1], 2)
+          + Math.pow(targetPos[2] - currentPos[2], 2));
 
-      int targetX = (int) Math.round(targetPositions[i][0]);
-      int targetY = (int) Math.round(targetPositions[i][1]);
-      int targetZ = (int) Math.round(targetPositions[i][2]);
+      while (distance > distanceThreshold) {
+        double[] directionVector = {
+            (targetPos[0] - currentPos[0]) / distance,
+            (targetPos[1] - currentPos[1]) / distance,
+            (targetPos[2] - currentPos[2]) / distance
+        };
 
-      List<AStar.Node> path = AStar.findPath(grid, startX, startY, startZ, targetX, targetY, targetZ);
+        double speed = 0.02;
+        double[] newPosition = {
+            currentPos[0] + directionVector[0] * speed,
+            currentPos[1] + directionVector[1] * speed,
+            currentPos[2] + directionVector[2] * speed
+        };
 
-      if (path != null && !path.isEmpty()) {
-        // Move drone along the path
-        for (int j = 1; j < path.size(); j++) {
-          AStar.Node node = path.get(j);
-          double[] newPosition = { node.x, node.y, node.z };
-          transFields[i].setSFVec3f(newPosition);
-          System.out.println("Drone" + (i + 1) + " moved to: (" + newPosition[0] + ", " + newPosition[1] + ", " + newPosition[2] + ")");
-          // Delay for movement speed
-          try {
-            Thread.sleep(100);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
+        // Move the drone to the new position
+        transFields[i].setSFVec3f(newPosition);
+        System.out.println("Drone" + (i + 1) + " moved to: (" + newPosition[0] + ", " + newPosition[1] + ", " + newPosition[2] + ")");
+
+        // Update current position and distance
+        currentPos = newPosition;
+        distance = Math.sqrt(Math.pow(targetPos[0] - currentPos[0], 2)
+            + Math.pow(targetPos[1] - currentPos[1], 2)
+            + Math.pow(targetPos[2] - currentPos[2], 2));
+
+        // Delay for movement speed
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
         }
-      } else {
-        System.out.println("No path found for Drone" + (i + 1));
       }
     }
   }
 
-  private void formTShape() {
+  private void formTShape(double[][] currentPosition) {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
         { 0.0, 1.0, 1.2 },
@@ -112,10 +114,10 @@ public class SupervisorController extends Supervisor {
         { 2.0, 1.0, 2.0 }
     };
     currentFormation = targetPositions;
-    moveDronesToTarget(targetPositions);
+    moveDronesToTarget(targetPositions, currentPosition);
   }
 
-  private void formLShape() {
+  private void formLShape(double[][] currentPosition) {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
         { 1.0, 0.0, 1.2 },
@@ -125,10 +127,10 @@ public class SupervisorController extends Supervisor {
         { 3.0, 2.0, 1.8 }
     };
     currentFormation = targetPositions;
-    moveDronesToTarget(targetPositions);
+    moveDronesToTarget(targetPositions, currentPosition);
   }
 
-  private void formBoxShape() {
+  private void formBoxShape(double[][] currentPosition) {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
         { 1.0, 0.0, 1.0 },
@@ -138,7 +140,7 @@ public class SupervisorController extends Supervisor {
         { 1.0, 0.0, 2.0 }
     };
     currentFormation = targetPositions;
-    moveDronesToTarget(targetPositions);
+    moveDronesToTarget(targetPositions, currentPosition);
   }
 
   public static void main(String[] args) {
