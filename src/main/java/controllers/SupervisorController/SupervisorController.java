@@ -49,10 +49,12 @@ public class SupervisorController extends Supervisor {
             break;
           case (Keyboard.SHIFT + 'B'):
             System.out.println("Box Formation");
-            formLShape();
+            formBoxShape();
             break;
         }
         key = keyboard.getKey();
+      }
+      if (keyboard.getKeyboard() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
         currentFormation = baseFormation;
         moveDronesToTarget(baseFormation);
       }
@@ -94,7 +96,7 @@ public class SupervisorController extends Supervisor {
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
   }
-  
+
   private void formLShape() {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
@@ -107,7 +109,7 @@ public class SupervisorController extends Supervisor {
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
   }
-  
+
   private void formBoxShape() {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
@@ -120,7 +122,6 @@ public class SupervisorController extends Supervisor {
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
   }
-  
 
   public static void main(String[] args) {
     SupervisorController supervisorController = new SupervisorController();
