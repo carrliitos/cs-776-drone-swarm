@@ -5,8 +5,6 @@ import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
 import com.cyberbotics.webots.controller.Keyboard;
-import com.cyberbotics.webots.controller.Mouse;
-import com.cyberbotics.webots.controller.MouseState;
 
 import java.io.IOException;
 
@@ -23,8 +21,6 @@ public class DroneController extends Robot {
   private GPS gps;
   private Gyro gyro;
   private Keyboard keyboard;
-  private Mouse mouse;
-  private MouseState mouseState;
     
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
@@ -52,10 +48,6 @@ public class DroneController extends Robot {
     gyro.enable(TIME_STEP);
     keyboard = new Keyboard();
     keyboard.enable(TIME_STEP);
-    mouse = new Mouse();
-    mouse.enable(TIME_STEP);
-    mouse.enable3dPosition();
-    mouseState = mouse.getState();
     frontLeftLED = new LED("front left led");
     frontRightLED = new LED("front right led");
     frontRightPropeller = getMotor("front right propeller");
