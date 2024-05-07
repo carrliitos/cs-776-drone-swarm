@@ -2,6 +2,8 @@ import com.cyberbotics.webots.controller.Supervisor;
 import com.cyberbotics.webots.controller.Node;
 import com.cyberbotics.webots.controller.Field;
 import com.cyberbotics.webots.controller.Keyboard;
+import java.util.Arrays;
+import java.util.List;
 
 public class SupervisorController extends Supervisor {
   private final int TIME_STEP = (int) Math.round(getBasicTimeStep());
@@ -16,6 +18,11 @@ public class SupervisorController extends Supervisor {
       { 0.0, 0.5, 1.0 },
       { 0.0, 2.0, 1.0 },
       { 0.0, 0.5, 1.0 }
+  };
+  private int[][][] grid = {
+      {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+      {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+      {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
   };
 
   public SupervisorController() {
@@ -54,7 +61,7 @@ public class SupervisorController extends Supervisor {
         }
         key = keyboard.getKey();
       }
-      if (keyboard.getKeyboard() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
+      if (keyboard.getKey() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
         currentFormation = baseFormation;
         moveDronesToTarget(baseFormation);
       }
