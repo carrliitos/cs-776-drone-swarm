@@ -5,6 +5,8 @@ import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
 import com.cyberbotics.webots.controller.Keyboard;
+import com.cyberbotics.webots.controller.Mouse;
+import com.cyberbotics.webots.controller.MouseState;
 
 import java.io.IOException;
 
@@ -21,6 +23,8 @@ public class DroneController extends Robot {
   private GPS gps;
   private Gyro gyro;
   private Keyboard keyboard;
+  private Mouse mouse;
+  private MouseState mouseState;
     
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
@@ -48,6 +52,10 @@ public class DroneController extends Robot {
     gyro.enable(TIME_STEP);
     keyboard = new Keyboard();
     keyboard.enable(TIME_STEP);
+    mouse = new Mouse();
+    mouse.enable(TIME_STEP);
+    mouse.enable3dPosition();
+    mouseState = mouse.getState();
     frontLeftLED = new LED("front left led");
     frontRightLED = new LED("front right led");
     frontRightPropeller = getMotor("front right propeller");
@@ -147,7 +155,7 @@ public class DroneController extends Robot {
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance,
                                  double xPos, double yPos, double targetAltitude) {
-    double[] disturbances = {pitchDisturbance, yawDisturbance, rollDisturbance, targetAltitude};
+    double[] disturbances = { pitchDisturbance, yawDisturbance, rollDisturbance, targetAltitude };
     keyboardControls(disturbances);
     
     pitchDisturbance = disturbances[0];
@@ -215,6 +223,11 @@ public class DroneController extends Robot {
 
       // Stabilize the Camera by actuating the camera motors according to the gyro feedback.
       stabilizeCamera(rollVelocity, pitchVelocity);
+      
+      // Point and Click
+      if (mouseState.getLeft()) {
+        System.out.println("Clicked!");
+      }
 
       // Compute the roll, pitch, yaw and vertical inputs.
       double[] rpyvInputs = computeInputs(roll, altitude, rollVelocity, rollDisturbance, 
