@@ -73,12 +73,12 @@ public class SupervisorController extends Supervisor {
       int targetY = (int) Math.round(targetPositions[i][1]);
       int targetZ = (int) Math.round(targetPositions[i][2]);
 
-      List<AStar3D.Node> path = AStar3D.findPath(grid, startX, startY, startZ, targetX, targetY, targetZ);
+      List<AStar.Node> path = AStar.findPath(grid, startX, startY, startZ, targetX, targetY, targetZ);
 
       if (path != null && !path.isEmpty()) {
         // Move drone along the path
         for (int j = 1; j < path.size(); j++) {
-          AStar3D.Node node = path.get(j);
+          AStar.Node node = path.get(j);
           double[] newPosition = { node.x, node.y, node.z };
           transFields[i].setSFVec3f(newPosition);
           System.out.println("Drone" + (i + 1) + " moved to: (" + newPosition[0] + ", " + newPosition[1] + ", " + newPosition[2] + ")");
