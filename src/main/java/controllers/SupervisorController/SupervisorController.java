@@ -8,7 +8,6 @@ public class SupervisorController extends Supervisor {
   private Node[] droneNodes = new Node[6];
   private Field[] transFields = new Field[6];
   private Keyboard keyboard;
-  private final int[] base_values = { 1, 1, 1 };
   private double[][] currentFormation;
   private double[][] baseFormation = {
       { 0.0, 0.0, 1.0 },
