@@ -1,11 +1,29 @@
 import java.util.*;
 
+/**
+ * AStar class contains a static nested Node class and a static method for finding a path using the A* algorithm.
+ * @author Benzon Carlitos Salazar
+ */
 public class AStar {
-  private static class Node {
+
+  /**
+   * Represents a node in the A* algorithm.
+   */
+  public static class Node {
     int x, y, z;
     Node parent;
     double g, h;
 
+    /**
+     * Constructs a new Node.
+     *
+     * @param x       The x-coordinate of the node.
+     * @param y       The y-coordinate of the node.
+     * @param z       The z-coordinate of the node.
+     * @param parent  The parent node of this node.
+     * @param g       The cost from the start node to this node.
+     * @param h       The heuristic cost from this node to the target node.
+     */
     public Node(int x, int y, int z, Node parent, double g, double h) {
       this.x = x;
       this.y = y;
@@ -15,11 +33,28 @@ public class AStar {
       this.h = h;
     }
 
+    /**
+     * Calculates the total cost of the node (g + h).
+     *
+     * @return The total cost of the node.
+     */
     public double getF() {
       return g + h;
     }
   }
 
+  /**
+   * Finds a path using the A* algorithm.
+   *
+   * @param grid      The 3D grid representing the environment.
+   * @param startX    The x-coordinate of the start position.
+   * @param startY    The y-coordinate of the start position.
+   * @param startZ    The z-coordinate of the start position.
+   * @param targetX   The x-coordinate of the target position.
+   * @param targetY   The y-coordinate of the target position.
+   * @param targetZ   The z-coordinate of the target position.
+   * @return          The list of nodes representing the path from start to target, or null if no path is found.
+   */
   public static List<Node> findPath(int[][][] grid, int startX, int startY, int startZ, int targetX, int targetY, int targetZ) {
     PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(Node::getF));
     Set<Node> closedSet = new HashSet<>();
@@ -68,8 +103,18 @@ public class AStar {
     return null;
   }
 
+  /**
+   * Calculates the heuristic value (Euclidean distance) between two points in 3D space.
+   *
+   * @param x1  The x-coordinate of the first point.
+   * @param y1  The y-coordinate of the first point.
+   * @param z1  The z-coordinate of the first point.
+   * @param x2  The x-coordinate of the second point.
+   * @param y2  The y-coordinate of the second point.
+   * @param z2  The z-coordinate of the second point.
+   * @return    The heuristic value between the two points.
+   */
   private static double heuristic(int x1, int y1, int z1, int x2, int y2, int z2) {
-    // Euclidean distance heuristic
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
   }
 }
