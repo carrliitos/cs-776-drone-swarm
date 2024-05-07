@@ -24,8 +24,8 @@ WorldInfo {
   }
 }
 Viewpoint {
-  orientation 0.22426521920040932 0.6960092837222708 -0.6821115659695297 0.9484341605379942
-  position -5.1800335408129525 4.104479484646248 5.171468671262972
+  orientation 0.2014403829783992 0.7393966577306529 -0.6424284821225283 0.8744142571069838
+  position -5.597736105611532 3.780585124737963 5.059221181664668
   near 0.2
   follow "Mavic 2 PRO"
   followSmoothness 0.2
@@ -170,7 +170,7 @@ Forest {
   maxRadius 6
   minRadius 3
 }
-DEF Drone1 Robot {
+DEF Drone5 Robot {
   translation 0 0 0.1
   rotation 0 0 1 3.141590777218456
   children [
@@ -1283,7 +1283,7 @@ DEF Drone1 Robot {
   }
   controller "DroneController"
 }
-DEF Drone4 Robot {
+DEF Drone2 Robot {
   translation 1 0.5 0.1
   rotation 0 0 1 3.141590777218456
   children [
@@ -2396,7 +2396,7 @@ DEF Drone4 Robot {
   }
   controller "DroneController"
 }
-DEF Drone6 Robot {
+DEF Drone3 Robot {
   translation 1 -0.5 0.1
   rotation 0 0 1 3.141590777218456
   children [
@@ -3509,7 +3509,7 @@ DEF Drone6 Robot {
   }
   controller "DroneController"
 }
-DEF Drone5 Robot {
+DEF Drone1 Robot {
   translation 1 1.5 0.1
   rotation 0 0 1 3.141590777218456
   children [
@@ -4622,7 +4622,7 @@ DEF Drone5 Robot {
   }
   controller "DroneController"
 }
-DEF Drone3 Robot {
+DEF Drone6 Robot {
   translation 0 -1 0.1
   rotation 0 0 1 3.141590777218456
   children [
@@ -5735,7 +5735,7 @@ DEF Drone3 Robot {
   }
   controller "DroneController"
 }
-DEF Drone2 Robot {
+DEF Drone4 Robot {
   translation 0 1 0.1
   rotation 0 0 1 3.141590777218456
   children [

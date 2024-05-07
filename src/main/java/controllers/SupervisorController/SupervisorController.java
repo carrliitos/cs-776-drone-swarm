@@ -2,6 +2,8 @@ import com.cyberbotics.webots.controller.Supervisor;
 import com.cyberbotics.webots.controller.Node;
 import com.cyberbotics.webots.controller.Field;
 import com.cyberbotics.webots.controller.Keyboard;
+import java.util.Arrays;
+import java.util.List;
 
 public class SupervisorController extends Supervisor {
   private final int TIME_STEP = (int) Math.round(getBasicTimeStep());
@@ -51,10 +53,14 @@ public class SupervisorController extends Supervisor {
             System.out.println("Box Formation");
             formBoxShape();
             break;
+          case (Keyboard.SHIFT + 'I'):
+            System.out.println("Line Formation");
+            formLineShape();
+            break;
         }
         key = keyboard.getKey();
       }
-      if (keyboard.getKeyboard() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
+      if (keyboard.getKey() == 0 && !Arrays.deepEquals(currentFormation, baseFormation)) {
         currentFormation = baseFormation;
         moveDronesToTarget(baseFormation);
       }
@@ -79,19 +85,17 @@ public class SupervisorController extends Supervisor {
       }
 
       transFields[i].setSFVec3f(newPosition);
-
-      System.out.println("Drone" + (i + 1) + " moved to: (" + newPosition[0] + ", " + newPosition[1] + ", " + newPosition[2] + ")");
     }
   }
 
   private void formTShape() {
     double[][] targetPositions = {
-        { 0.0, 0.0, 1.0 },
-        { 0.0, 1.0, 1.2 },
-        { 0.0, -1.0, 1.4 },
-        { 0.0, -2.0, 1.6 },
-        { -2.0, 1.0, 1.8 },
-        { 2.0, 1.0, 2.0 }
+        { 1.0, 1.5, 1.0 },
+        { 1.0, 0.5, 1.2 },
+        { 1.0, -0.5, 1.4 },
+        { 0.0, 0.5, 1.5 },
+        { -1.0, 0.5, 1.6 },
+        { -2.0, 0.5, 1.8 }
     };
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
@@ -99,12 +103,12 @@ public class SupervisorController extends Supervisor {
 
   private void formLShape() {
     double[][] targetPositions = {
-        { 0.0, 0.0, 1.0 },
-        { 1.0, 0.0, 1.2 },
-        { 2.0, 0.0, 1.4 },
-        { 3.0, 0.0, 1.5 },
-        { 3.0, 1.0, 1.6 },
-        { 3.0, 2.0, 1.8 }
+        { 1.0, 1.5, 1.0 },
+        { 1.0, 0.5, 1.2 },
+        { 1.0, -0.5, 1.4 },
+        { 0.0, 1.5, 1.5 },
+        { -1.0, 1.5, 1.6 },
+        { -2.0, 1.5, 1.8 }
     };
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
@@ -118,6 +122,19 @@ public class SupervisorController extends Supervisor {
         { 0.0, 1.0, 1.0 },
         { 0.0, 0.0, 2.0 },
         { 1.0, 0.0, 2.0 }
+    };
+    currentFormation = targetPositions;
+    moveDronesToTarget(targetPositions);
+  }
+  
+  private void formLineShape() {
+    double[][] targetPositions = {
+        { 1.0, 1.0, 1.0 },
+        { 1.0, 2.0, 1.0 },
+        { 1.0, 3.0, 1.0 },
+        { 1.0, 4.0, 1.0 },
+        { 1.0, 5.0, 1.0 },
+        { 1.0, 6.0, 1.0 }
     };
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
