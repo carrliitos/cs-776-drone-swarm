@@ -5,7 +5,7 @@ sceneTreePerspectives: 000000ff000000010000000300000022000000c0000000fa010000000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 0 "controllers/DroneController/DroneController.java" "controllers/Drone2Controller/Drone2Controller.java" "controllers/Drone3Controller/Drone3Controller.java" "controllers/Drone4Controller/Drone4Controller.java"
+textFiles: 3 "controllers/DroneController/DroneController.java" "controllers/Drone2Controller/Drone2Controller.java" "controllers/Drone3Controller/Drone3Controller.java" "controllers/Drone4Controller/Drone4Controller.java"
 consoles: Console:All:All
 renderingDevicePerspectives: Mavic 2 PRO(1):camera;0;1;0;0
 renderingDevicePerspectives: Mavic 2 PRO(3):camera;0;1;0;0

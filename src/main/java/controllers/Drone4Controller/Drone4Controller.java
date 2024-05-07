@@ -13,10 +13,13 @@ import java.io.IOException;
 public class Drone4Controller extends Robot {
 
     final int DRONE_NUMBER = 4;
-    final int[] base_values = {1, -1, 1};
+    double[] base_values = {1, -1, 1};
+    double[] offset = {base_values[0],base_values[1],base_values[2]};
     
-    final double[][] box_coords = {{3,3,1},{3,-3,1},{-3,-3,1},{-3,3,1}};
-  
+    final double[][] box_coords = {{2,-2,1},{-2,-2,1},{-2,2,1}, {2,2,1}};
+    final double[][] line_coords = {{0,-1.5,1},{0,-.5,1},{0,.5,1},{0,1.5,1}};
+
+
     final int TIME_STEP = 32; // Simulation time step in milliseconds
     
 
@@ -133,11 +136,11 @@ public class Drone4Controller extends Robot {
     
     
     double input_x = 0;
-    double x_iterator = 0.05;
+    double x_iterator = 0.03;
     int x_it_count = 0;
     
     double input_y = 0;
-    double y_iterator = 0.05;
+    double y_iterator = 0.03;
     int y_it_count = 0;
     
     double input_alt = 0;
@@ -166,12 +169,12 @@ public class Drone4Controller extends Robot {
       if (mouseState.getRight() && mouseState.getLeft()){
         System.out.printf("MouseX = %f.2 | MouseY = %f.2, | MouseZ = %f.2 | Clicked = %s \n", mouseX, mouseY, mouseZ, mouseState.getRight());
         
-        input_x = mouseX;
+        input_x = mouseX + offset[0];
         x_it_count = (int)((input_x - target_x)/x_iterator);           
         
-        input_y = mouseY;
+        input_y = mouseY + offset[1];
         y_it_count = (int)((input_y + target_y)/y_iterator);
-
+        
         //input_alt = mouseZ;
         //alt_it_count = (int)((input_alt - target_altitude)/0.05);
 
@@ -260,6 +263,10 @@ public class Drone4Controller extends Robot {
            break;
            
           case (Keyboard.SHIFT+'X'):
+          offset[0] = box_coords[DRONE_NUMBER-1][0];
+          offset[1] = -1*box_coords[DRONE_NUMBER-1][1];
+          offset[2] = box_coords[DRONE_NUMBER-1][2];
+          
            input_x = box_coords[DRONE_NUMBER-1][0];
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
@@ -269,14 +276,35 @@ public class Drone4Controller extends Robot {
            input_alt = box_coords[DRONE_NUMBER-1][2];
            alt_it_count = (int)((input_alt - target_altitude)/0.05);
            
-           System.out.println("Test Box");
+           System.out.println("Formation Box");
+           break;
+           
+           case (Keyboard.SHIFT+'L'):
+           offset[0] = line_coords[DRONE_NUMBER-1][0];
+           offset[1] = -1*line_coords[DRONE_NUMBER-1][1];
+           offset[2] = line_coords[DRONE_NUMBER-1][2];
+          
+           input_x = line_coords[DRONE_NUMBER-1][0];
+           x_it_count = (int)((input_x - target_x)/x_iterator);
+           
+           input_y = -1*line_coords[DRONE_NUMBER-1][1];
+           y_it_count = (int)((input_y + target_y)/y_iterator);
+           
+           input_alt = line_coords[DRONE_NUMBER-1][2];
+           alt_it_count = (int)((input_alt - target_altitude)/0.05);
+           
+           System.out.println("Line Formation");
            break;
            
           case (Keyboard.SHIFT+'B'):
+          offset[0] = base_values[0];
+          offset[1] = base_values[1];
+          offset[2] = base_values[2];
+
            input_x = base_values[0];
            x_it_count = (int)((input_x - target_x)/x_iterator);
            
-           input_y = -1*base_values[1];
+           input_y = base_values[1];
            y_it_count = (int)((input_y + target_y)/y_iterator);
            
            input_alt = base_values[2];
