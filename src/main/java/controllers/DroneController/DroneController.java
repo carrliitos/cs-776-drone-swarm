@@ -4,12 +4,13 @@ import com.cyberbotics.webots.controller.LED;
 import com.cyberbotics.webots.controller.InertialUnit;
 import com.cyberbotics.webots.controller.GPS;
 import com.cyberbotics.webots.controller.Gyro;
+import com.cyberbotics.webots.controller.Keyboard;
 
 import java.io.IOException;
 
 public class DroneController extends Robot {
-  private static final int TIME_STEP = 64; // Simulation time step in milliseconds
-  private static final double TARGET_ALTITUDE = 1.0;
+  // private static final int TIME_STEP = 32; // Simulation time step in milliseconds
+  private final int TIME_STEP = (int) Math.round(getBasicTimeStep());
   private static final double TARGET_X = 0.0;
   private static final double TARGET_Y = 0.0;
 
@@ -19,6 +20,7 @@ public class DroneController extends Robot {
   private InertialUnit imu;
   private GPS gps;
   private Gyro gyro;
+  private Keyboard keyboard;
     
   // Constants
   private static final double K_VERTICAL_THRUST = 68.5; // with this thrust, the drone lifts.
@@ -44,6 +46,8 @@ public class DroneController extends Robot {
     gps.enable(TIME_STEP);
     gyro = getGyro("gyro");
     gyro.enable(TIME_STEP);
+    keyboard = new Keyboard();
+    keyboard.enable(TIME_STEP);
     frontLeftLED = new LED("front left led");
     frontRightLED = new LED("front right led");
     frontRightPropeller = getMotor("front right propeller");
@@ -70,7 +74,7 @@ public class DroneController extends Robot {
     // Wait one second
     double previousTime = 0.0;
     while (step(TIME_STEP) != -1) {
-      if (getTime() - previousTime > 3.0) { break; }
+      if (getTime() - previousTime > 1.0) { break; }
     }
   }
   
@@ -108,6 +112,39 @@ public class DroneController extends Robot {
   private double[] computeInputs(double roll, double altitude, double rollVelocity, double rollDisturbance, 
                                  double pitch, double pitchVelocity, double pitchDisturbance, double yawDisturbance,
                                  double xPos, double yPos) {
+    double targetAltitude = 1.0;
+    int key = keyboard.getKey();
+    while (key > 0) {
+      switch (key) {
+        case Keyboard.UP:
+          pitchDisturbance = -2.0;
+          break;
+        case Keyboard.DOWN:
+          pitchDisturbance = 2.0;
+          break;
+        case Keyboard.RIGHT:
+          yawDisturbance = -1.3;
+          break;
+        case Keyboard.LEFT:
+          yawDisturbance = 1.3;
+          break;
+        case (Keyboard.SHIFT + Keyboard.RIGHT):
+          rollDisturbance = -1.0;
+          break;
+        case (Keyboard.SHIFT + Keyboard.LEFT):
+          rollDisturbance = 1.0;
+          break;
+        case (Keyboard.SHIFT + Keyboard.UP):
+          targetAltitude += 0.05;
+          System.out.printf("target altitude: %.2f [m]%n", targetAltitude);
+          break;
+        case (Keyboard.SHIFT + Keyboard.DOWN):
+          targetAltitude -= 0.05;
+          System.out.printf("target altitude: %.2f [m]%n", targetAltitude);
+          break;
+      }
+      key = keyboard.getKey();
+    }
 
     double pitchInput = K_PITCH_P * clamp(pitch, -1.0, 1.0) + pitchVelocity + pitchDisturbance;
     double rollInput = K_ROLL_P * clamp(roll, -1.0, 1.0) + rollVelocity + rollDisturbance;
@@ -121,7 +158,7 @@ public class DroneController extends Robot {
     double velocityX = K_POSITION_P * errorX;
     double velocityY = K_POSITION_P * errorY;
 
-    final double clampedDiffAltitude = clamp(TARGET_ALTITUDE - altitude + K_VERTICAL_OFFSET, -1.0, 1.0);
+    final double clampedDiffAltitude = clamp(targetAltitude - altitude + K_VERTICAL_OFFSET, -1.0, 1.0);
     final double verticalInput = K_VERTICAL_P * Math.pow(clampedDiffAltitude, 3);
     
     // Apply the position control adjustments to the pitch and roll inputs
@@ -150,10 +187,6 @@ public class DroneController extends Robot {
     displayWelcomeMessage();
     
     while (step(TIME_STEP) != -1) {
-      double rollDisturbance = 0.0;
-      double pitchDisturbance = 0.0;
-      double yawDisturbance = 0.0;
-
       double[] robotState = getRobotState();
       double roll = robotState[0];
       double pitch = robotState[1];
@@ -162,6 +195,9 @@ public class DroneController extends Robot {
       double altitude = robotState[4];
       double rollVelocity = robotState[5];
       double pitchVelocity = robotState[6];
+      double rollDisturbance = 0.0;
+      double pitchDisturbance = 0.0;
+      double yawDisturbance = 0.0;
 
       // Blink the front LEDs alternatively with a 1 second rate.
       blinkLEDS();
@@ -180,7 +216,7 @@ public class DroneController extends Robot {
       
       // Actuate the motors taking into consideration all the computed inputs.
       activateActuators(verticalInput, rollInput, pitchInput, yawInput);
-    }
+    };
   }
   
   public static void main(String[] args) {
