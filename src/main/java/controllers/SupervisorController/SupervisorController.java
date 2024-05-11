@@ -118,10 +118,10 @@ public class SupervisorController extends Supervisor {
     double[][] targetPositions = {
         { 0.0, 0.0, 1.0 },
         { 1.0, 0.0, 1.0 },
-        { 1.0, 1.0, 1.0 },
+        { 1.0, 1.0, 1.5 },
         { 0.0, 1.0, 1.0 },
-        { 0.0, 0.0, 2.0 },
-        { 1.0, 0.0, 2.0 }
+        { 0.0, 0.0, 1.5 },
+        { 1.0, 0.0, 1.0 }
     };
     currentFormation = targetPositions;
     moveDronesToTarget(targetPositions);
